@@ -37,12 +37,16 @@ def eval_device_access_profile(fw_obj: SophosFirewall,
         "profiles": {
             "expected": expected_profiles,
             "actual": profiles
-        }
+        },
+        "pass_ct": 0,
+        "fail_ct": 0
     }
     if profiles == expected_profiles:
         result_dict["profiles"]["status"] = "AUDIT_PASS"
+        result_dict["pass_ct"] += 1
     else:
         result_dict["profiles"]["status"] = "AUDIT_FAIL"
+        result_dict["fail_ct"] += 1
     
     if result_dict["profiles"]["status"] == "AUDIT_FAIL":
         result_dict["audit_result"] = "FAIL"

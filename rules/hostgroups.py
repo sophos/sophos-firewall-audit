@@ -16,8 +16,11 @@ def eval_hostgroups(fw_obj: SophosFirewall,
         dict: Audit results and output table(s)
     """
     result_dict = {
-        "audit_result": "PASS"
+        "audit_result": "PASS",
+        "pass_ct": 0,
+        "fail_ct": 0
     }
+
     output = []
     for host_group in settings["groups"]:
         expected_hosts = sorted(host_group["hosts"])
@@ -45,8 +48,10 @@ def eval_hostgroups(fw_obj: SophosFirewall,
         
         if actual_hosts == expected_hosts:
             result_dict["hostgroups"]["status"] = "AUDIT_PASS"
+            result_dict["pass_ct"] += 1
         else:
             result_dict["hostgroups"]["status"] = "AUDIT_FAIL"
+            result_dict["fail_ct"] += 1
         
         if result_dict["hostgroups"]["status"] == "AUDIT_FAIL":
             result_dict["audit_result"] = "FAIL"
