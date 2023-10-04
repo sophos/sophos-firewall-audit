@@ -1,5 +1,5 @@
 *.whl
 *.zip
 wip.txt
-audit-results/
+audit-results*
 __pycache__/
