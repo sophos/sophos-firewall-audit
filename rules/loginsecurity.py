@@ -66,6 +66,8 @@ def eval_loginsecurity(fw_obj: SophosFirewall,
 
     result_dict = {
         "audit_result": "PASS",
+        "pass_ct": 0,
+        "fail_ct": 0,
         "loginsecurity": {
                 "expected": expected_settings,
                 "actual": actual_settings
@@ -78,6 +80,9 @@ def eval_loginsecurity(fw_obj: SophosFirewall,
                 if result[lvl1]["expected"] != result[lvl1]["actual"]:
                     status = "AUDIT_FAIL"
                     result_dict["audit_result"] = "FAIL"
+                    result_dict["fail_ct"] += 1
+                else:
+                    result_dict["pass_ct"] += 1
                 output.append([
                 "Admin and user settings",
                 "System > Administration > Admin and user settings",
@@ -92,6 +97,9 @@ def eval_loginsecurity(fw_obj: SophosFirewall,
                     if result[lvl1][lvl2]["expected"] != result[lvl1][lvl2]["actual"]:
                         status = "AUDIT_FAIL"
                         result_dict["audit_result"] = "FAIL"
+                        result_dict["fail_ct"] += 1
+                    else:
+                        result_dict["pass_ct"] += 1
                     output.append([
                         "Admin and user settings",
                         "System > Administration > Admin and user settings",
@@ -106,6 +114,9 @@ def eval_loginsecurity(fw_obj: SophosFirewall,
                         if result[lvl1][lvl2][lvl3]["expected"] != result[lvl1][lvl2][lvl3]["actual"]:
                             status = "AUDIT_FAIL",
                             result_dict["audit_result"] = "FAIL"
+                            result_dict["fail_ct"] += 1
+                        else:
+                            result_dict["pass_ct"] += 1
                         output.append([
                             "Admin and user settings",
                             "System > Administration > Admin and user settings",

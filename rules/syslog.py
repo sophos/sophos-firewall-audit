@@ -52,6 +52,8 @@ def eval_syslog(fw_obj: SophosFirewall,
 
     result_dict = {
         "audit_result": "PASS",
+        "pass_ct": 0,
+        "fail_ct": 0,
         "syslog": {
             "expected": expected_settings,
             "actual": actual_settings
@@ -68,7 +70,10 @@ def eval_syslog(fw_obj: SophosFirewall,
                 settings_type = result[category][setting]["Name"]
                 if not result[category][setting]['Expected'] == result[category][setting]['Actual']:
                     category_status = "AUDIT_FAIL"
-                    result_dict["audit_result"] = "FAIL"           
+                    result_dict["audit_result"] = "FAIL"
+                    result_dict["fail_ct"] += 1
+            if category_status == "AUDIT_PASS":
+                result_dict["pass_ct"] += 1
             output.append([
                 "Syslog",
                 "Configure > System services > Log settings",

@@ -38,14 +38,18 @@ def eval_ips_policies(fw_obj: SophosFirewall,
             "expected": expected_policies,
             "actual": actual_policies
         },
-        "audit_result": "PASS"
+        "audit_result": "PASS",
+        "pass_ct": 0,
+        "fail_ct": 0
     }
     for policy in expected_policies:
         result_dict["policies"][policy] = {}
         if policy in result_dict["policies"]["actual"]: 
             result_dict["policies"][policy]["status"] = "AUDIT_PASS"
+            result_dict["pass_ct"] += 1
         else:
             result_dict["policies"][policy]["status"] = "AUDIT_FAIL"
+            result_dict["fail_ct"] += 1
             result_dict["audit_result"] = "FAIL"
     
     output = []

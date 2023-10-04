@@ -55,10 +55,9 @@ def update_status_dict(result, status_dict, firewall_name):
     Returns:
         dict: Returns the passed in status_dict with the counters updated
     """
-    if result["audit_result"] == "PASS":
-        status_dict[firewall_name]["success_ct"] += 1
-    else:
-        status_dict[firewall_name]["failed_ct"] += 1
+    status_dict[firewall_name]["success_ct"] += result["pass_ct"]
+    status_dict[firewall_name]["failed_ct"] += result["fail_ct"]
+    logging.info(f"{firewall_name}: Success: {status_dict[firewall_name]['success_ct']} Failed: {status_dict[firewall_name]['failed_ct']}")
     return status_dict
 
 def process_rule(method, settings, log_msg, fw_obj, status_dict):
@@ -89,7 +88,6 @@ def nb_graphql_query(query):
     Returns:
         list: List of dicts [{"hostname": name, "port": port}]
     """
-    print(query)
     url = os.environ.get("NAUTOBOT_URL")
     token = os.environ.get("NAUTOBOT_TOKEN")
     nautobot = api(url=url, token=token)
@@ -167,6 +165,7 @@ if __name__ == '__main__':
     group2.add_argument("-a", "--all_devices", help="All Sophos firewalls in Nautobot")
 
     args = parser.parse_args()
+    logging.info("Starting Sophos Firewall audit")
 
     if args.use_nautobot:
         if args.device_list:
@@ -181,12 +180,13 @@ if __name__ == '__main__':
         if args.all_devices:
             nb_query = all_devices_query(env)
         firewalls = nb_graphql_query(nb_query)
+        logging.info(f"Using Nautobot inventory with GraphQL query: \n{nb_query}")
     if args.inventory_file:
         with open(args.inventory_file, "r", encoding="utf-8") as fn:
             firewalls = yaml.safe_load(fn)
 
 
-    logging.info("Starting Sophos Firewall audit")
+    
     logging.info ("Retrieving credentials from Vault...")
     fw_password = get_credential(
         mount_point=os.environ['VAULT_MOUNT_POINT'],

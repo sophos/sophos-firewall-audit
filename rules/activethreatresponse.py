@@ -49,18 +49,24 @@ def eval_atp(fw_obj: SophosFirewall,
                 "expected": expected_policy,
                 "actual": actual_policy
             }
-        }
+        },
+        "pass_ct": 0,
+        "fail_ct": 0
     }
     if actual_state == expected_state:
         result_dict["atp"]["state"]["status"] = "AUDIT_PASS"
+        result_dict["pass_ct"] += 1
     else:
         result_dict["atp"]["state"]["status"] = "AUDIT_FAIL"
+        result_dict["fail_ct"] += 1
     
     if actual_policy == expected_policy:
         result_dict["atp"]["policy"]["status"] = "AUDIT_PASS"
+        result_dict["pass_ct"] += 1
     else:
         result_dict["atp"]["policy"]["status"] = "AUDIT_FAIL"
-    
+        result_dict["fail_ct"] += 1
+
     if result_dict["atp"]["state"]["status"] == "AUDIT_FAIL" or result_dict["atp"]["policy"]["status"] == "AUDIT_FAIL":
         result_dict["audit_result"] = "FAIL"
     else:

@@ -38,12 +38,16 @@ def eval_dns_servers(fw_obj: SophosFirewall,
         "servers": {
             "expected": expected_servers,
             "actual": servers
-        }
+        },
+        "pass_ct": 0,
+        "fail_ct": 0
     }
     if servers == expected_servers:
         result_dict["servers"]["status"] = "AUDIT_PASS"
+        result_dict["pass_ct"] += 1
     else:
         result_dict["servers"]["status"] = "AUDIT_FAIL"
+        result_dict["fail_ct"] += 1
     
     if result_dict["servers"]["status"] == "AUDIT_FAIL":
         result_dict["audit_result"] = "FAIL"

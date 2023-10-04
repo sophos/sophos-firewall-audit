@@ -42,12 +42,16 @@ def eval_admin_services(fw_obj: SophosFirewall,
         "services": {
             "expected": expected_services,
             "actual": services
-        }
+        },
+        "pass_ct": 0,
+        "fail_ct": 0
     }
     if services == expected_services:
         result_dict["services"]["status"] = "AUDIT_PASS"
+        result_dict["pass_ct"] += 1
     else:
         result_dict["services"]["status"] = "AUDIT_FAIL"
+        result_dict["fail_ct"] += 1
     
     if result_dict["services"]["status"] == "AUDIT_FAIL":
         result_dict["audit_result"] = "FAIL"

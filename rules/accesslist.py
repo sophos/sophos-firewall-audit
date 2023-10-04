@@ -43,17 +43,23 @@ def eval_access_list(fw_obj: SophosFirewall,
         "acl_services": {
             "expected": expected_services,
             "actual": services
-        }
+        },
+        "pass_ct": 0,
+        "fail_ct": 0
     }
     if hostgroups == expected_hostgroups:
         result_dict["acl_hostgroups"]["status"] = "AUDIT_PASS"
+        result_dict["pass_ct"] += 1
     else:
         result_dict["acl_hostgroups"]["status"] = "AUDIT_FAIL"
+        result_dict["fail_ct"] += 1
 
     if services == expected_services:
         result_dict["acl_services"]["status"] = "AUDIT_PASS"
+        result_dict["pass_ct"] += 1
     else:
         result_dict["acl_services"]["status"] = "AUDIT_FAIL"
+        result_dict["fail_ct"] += 1
     
     if result_dict["acl_hostgroups"]["status"] == "AUDIT_FAIL" or result_dict["acl_services"]["status"] == "AUDIT_FAIL":
         result_dict["audit_result"] = "FAIL"
