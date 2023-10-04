@@ -19,7 +19,7 @@ def eval_device_access_profile(fw_obj: SophosFirewall,
     expected_profiles = sorted(settings["profiles"])
     for i in range(1,3):
         try:
-            result = fw_obj.get_admin_profile(verify=False)
+            result = fw_obj.get_admin_profile()
         except Exception as err:
             logging.exception(f"Error while retrieving device access profiles for firewall {fw_name}: {err}")
             if i < 3:

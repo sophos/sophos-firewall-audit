@@ -20,7 +20,7 @@ def eval_ips_policies(fw_obj: SophosFirewall,
 
     for i in range(1,3):
         try:
-            result = fw_obj.get_ips_policy(verify=False)
+            result = fw_obj.get_ips_policy()
         except Exception as err:
             logging.exception(f"Error while retrieving IPS policies for firewall {fw_name}: {err}")
             if i < 3:

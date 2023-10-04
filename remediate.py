@@ -43,7 +43,7 @@ def backup(fw_obj, hostname, settings):
         Requests.response: API response object
     """
     logging.info(f"{hostname}: Begin updating Backup settings")
-    resp = fw_obj.update_backup(backup_params=settings, verify=False, debug=False)
+    resp = fw_obj.update_backup(backup_params=settings, debug=False)
     code = resp["Response"]["BackupRestore"]["Status"]["@code"]
     message = resp["Response"]["BackupRestore"]["Status"]["#text"]
     logging.info(f"{hostname}: {code} {message}")

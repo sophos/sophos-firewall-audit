@@ -20,7 +20,7 @@ def eval_snmpv3(fw_obj: SophosFirewall,
     
     for i in range(1,3):
         try:
-            result = fw_obj.get_snmpv3_user(verify=False)
+            result = fw_obj.get_snmpv3_user()
         except SophosFirewallZeroRecords:
             result = None
             break

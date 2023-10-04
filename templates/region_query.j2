@@ -1,0 +1,5 @@
+query {
+  devices(region: {{ region_list | tojson }}, manufacturer:"sophos", tag__n:"auxillary") {
+    name
+  }
+}

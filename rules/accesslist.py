@@ -21,7 +21,7 @@ def eval_access_list(fw_obj: SophosFirewall,
 
     for i in range(1,3):
         try:
-            acl_result = fw_obj.get_acl_rule(verify=False)
+            acl_result = fw_obj.get_acl_rule()
         except Exception as err:
             logging.exception(f"Error while retrieving access list for firewall {fw_name}: {err}")
             if i < 3:

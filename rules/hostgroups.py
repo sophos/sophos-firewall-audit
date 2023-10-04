@@ -24,7 +24,7 @@ def eval_hostgroups(fw_obj: SophosFirewall,
 
         for i in range(1,3):
             try:
-                result = fw_obj.get_ip_hostgroup(name=host_group["name"], verify=False)
+                result = fw_obj.get_ip_hostgroup(name=host_group["name"])
             except Exception as err:
                 logging.exception(f"Error while retrieving IP host group {host_group['name']} for firewall {fw_name}: {err}")
                 if i < 3:

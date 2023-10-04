@@ -20,7 +20,7 @@ def eval_notification_list(fw_obj: SophosFirewall,
 
     for i in range(1,3):
         try:
-            result = fw_obj.get_tag("Notificationlist", verify=False)
+            result = fw_obj.get_tag("Notificationlist")
         except Exception as err:
             logging.exception(f"Error while retrieving Notification List settings for firewall {fw_name}: {err}")
             if i < 3:

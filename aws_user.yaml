@@ -1,0 +1,68 @@
+Resources:
+    IAMUser:
+        Type: "AWS::IAM::User"
+        Properties:
+            UserName: factory-firewall-audit
+            ManagedPolicyArns:
+              - !Ref IAMAssumeRolePolicy
+
+    IAMRole:
+        Type: "AWS::IAM::Role"
+        Properties:
+            RoleName: "firewall-audit-s3"
+            AssumeRolePolicyDocument: !Sub |
+              {
+                  "Version": "2012-10-17",
+                  "Statement":
+                  [
+                      {
+                          "Effect": "Allow",
+                          "Principal":
+                          {
+                              "AWS": "arn:aws:iam::${AWS::AccountId}:user/${IAMUser}"
+                          },
+                          "Action": "sts:AssumeRole"
+                      }
+                  ]
+              }
+            MaxSessionDuration: 3600
+            ManagedPolicyArns: 
+              - !Ref IAMFirewallAuditS3Policy
+   
+
+    IAMAssumeRolePolicy:
+        Type: "AWS::IAM::ManagedPolicy"
+        Properties:
+            ManagedPolicyName: "firewall-audit-assumerole-s3"
+            PolicyDocument: !Sub |
+                {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Sid": "VisualEditor0",
+                            "Effect": "Allow",
+                            "Action": "sts:AssumeRole",
+                            "Resource": "arn:aws:iam::${AWS::AccountId}:role/firewall-audit-s3"
+                        }
+                    ]
+                }
+        
+    IAMFirewallAuditS3Policy:
+        Type: "AWS::IAM::ManagedPolicy"
+        Properties:
+            ManagedPolicyName: "firewall-audit-s3"
+            PolicyDocument: !Sub |
+                {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Sid": "VisualEditor0",
+                            "Effect": "Allow",
+                            "Action": [
+                                "s3:PutObject",
+                                "s3:GetObject"
+                            ],
+                            "Resource": "arn:aws:s3:::sophos-firewall-audit/*"
+                        }
+                    ]
+                }

@@ -22,7 +22,7 @@ def eval_admin_services(fw_obj: SophosFirewall,
 
     for i in range(1,3):
         try:
-            result = fw_obj.get_zone(name="WAN", verify=False)
+            result = fw_obj.get_zone(name="WAN")
         except Exception as err:
             logging.exception(f"Error while retrieving WAN zone from firewall {fw_name}: {err}")
             if i < 3:

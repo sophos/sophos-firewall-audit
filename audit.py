@@ -7,12 +7,16 @@ VAULT_USERNAME = HashiCorp Vault username
 ROLEID = HashiCorp Vault Role ID
 SECRETID = HashiCorp Vault Secret ID
 
+Optional, for use with Nautobot as inventory:
+NAUTOBOT_URL = Nautobot URL
+NAUTOBOT_TOKEN = Nautobot API Token
 """
 import os
-import yaml
-import json
 import logging
 from datetime import datetime
+import json
+import argparse
+import yaml
 from jinja2 import Environment, PackageLoader, select_autoescape
 from rich.logging import RichHandler
 from rich.highlighter import RegexHighlighter
@@ -20,6 +24,7 @@ from rich.theme import Theme
 from rich.console import Console
 from prettytable import PrettyTable
 from prettytable import ALL
+from pynautobot import api
 from sophosfirewall_python.firewallapi import SophosFirewall
 from auth import get_credential
 import rules
@@ -37,6 +42,7 @@ logging.basicConfig(level=logging.INFO, format=FORMAT, handlers=[RichHandler(con
                                                                              highlighter=DeviceNameHighlighter(),
                                                                              show_path=False,
                                                                              omit_repeated_times=False)])
+
 
 def update_status_dict(result, status_dict, firewall_name):
     """Update overall status counters in the status_dict
@@ -73,12 +79,112 @@ def process_rule(method, settings, log_msg, fw_obj, status_dict):
     status_dict = update_status_dict(result, status_dict, fw_obj.hostname)
     return {"result": result, "output": result["output"], "status_dict": status_dict}
 
+def nb_graphql_query(query):
+    """Query Nautobot using GraphQL returning a list of device names
+
+    Args:
+        nb_obj (pynautobot.core.api.Api): PyNautobot object
+        query (str): GraphQL query
+
+    Returns:
+        list: List of dicts [{"hostname": name, "port": port}]
+    """
+    print(query)
+    url = os.environ.get("NAUTOBOT_URL")
+    token = os.environ.get("NAUTOBOT_TOKEN")
+    nautobot = api(url=url, token=token)
+    nautobot.http_session.verify=False
+    graphql_response = nautobot.graphql.query(query=query)
+    return [{"hostname": firewall["name"], "port": "4444"} for firewall in graphql_response.json["data"]["devices"]]
+
+def device_query(environ, devices):
+    """Generate GraphQL query
+
+    Args:
+        environ (Environment): Jinja2 Environment
+        devices (list): List of devices
+
+    Returns:
+        str: GraphQL query
+    """
+    templ = environ.get_template("device_query.j2")
+    return templ.render(device_list=devices)
+
+def site_query(environ, sites):
+    """Generate GraphQL query
+
+    Args:
+        environ (Environment): Jinja2 Environment
+        sites (list): List of sites
+
+    Returns:
+        str: GraphQL query
+    """
+    templ = environ.get_template("site_query.j2")
+    return templ.render(site_list=sites)
+
+def region_query(environ, regions):
+    """Generate GraphQL query
+
+    Args:
+        environ (Environment): Jinja2 Environment
+        regions (list): List of regions
+
+    Returns:
+        str: GraphQL query
+    """
+    templ = environ.get_template("region_query.j2")
+    return templ.render(region_list=regions)
+
+def all_devices_query(environ):
+    """Generate GraphQL query
+
+    Args:
+        environ (Environment): Jinja2 Environment
+
+    Returns:
+        str: GraphQL query
+    """
+    templ = environ.get_template("all_devices_query.j2")
+    return templ.render()
+
+
 if __name__ == '__main__':
 
     env = Environment(
         loader=PackageLoader("audit"),
         autoescape=select_autoescape()
-    )  
+    )
+
+    parser = argparse.ArgumentParser()
+    group1 = parser.add_mutually_exclusive_group()
+    group2 = parser.add_mutually_exclusive_group()
+    group1.add_argument("-n", "--use_nautobot", help="Use Nautobot for inventory", action="store_true")
+    group1.add_argument("-i", "--inventory_file", help="Inventory filename")
+    group2.add_argument("-s", "--site_list", help="Comma separated list of Nautobot Sites for selection of devices")
+    group2.add_argument("-r", "--region_list", help="Comma separated list of Nautobot Regions for selection of devices")
+    group2.add_argument("-d", "--device_list", help="Comma separated list of Nautobot Devices")
+    group2.add_argument("-a", "--all_devices", help="All Sophos firewalls in Nautobot")
+
+    args = parser.parse_args()
+
+    if args.use_nautobot:
+        if args.device_list:
+            device_list = [line.strip() for line in args.device_list.split(",")]
+            nb_query = device_query(env, device_list)
+        if args.site_list:
+            site_list = [line.strip() for line in args.site_list.split(",")]
+            nb_query = site_query(env, site_list)
+        if args.region_list:
+            region_list = [line.strip() for line in args.region_list.split(",")]
+            nb_query = region_query(env, region_list)
+        if args.all_devices:
+            nb_query = all_devices_query(env)
+        firewalls = nb_graphql_query(nb_query)
+    if args.inventory_file:
+        with open(args.inventory_file, "r", encoding="utf-8") as fn:
+            firewalls = yaml.safe_load(fn)
+
 
     logging.info("Starting Sophos Firewall audit")
     logging.info ("Retrieving credentials from Vault...")
@@ -89,14 +195,9 @@ if __name__ == '__main__':
     )
     logging.info("Successfully retrieved credentials!")
 
-    with open("firewalls.yaml", "r") as fn:
-        firewalls = yaml.safe_load(fn)
-
     with open("audit_settings.yaml", "r") as fn:
         audit_settings = yaml.safe_load(fn)
-
-    
-
+  
     status_dict = {}
 
     dt = datetime.now()
@@ -108,7 +209,8 @@ if __name__ == '__main__':
             username=os.environ['VAULT_USERNAME'],
             password=fw_password,
             hostname=firewall['hostname'],
-            port=firewall['port']
+            port=firewall['port'],
+            verify=False
         )
 
         results = []
@@ -216,10 +318,10 @@ if __name__ == '__main__':
         template = env.get_template("results.j2")
         result_html = template.render(firewall_name=firewall_name, table=table.get_html_string(format=True))
 
-        with open (f"{dirname}/{firewall_name}.html", "w") as fn:
+        with open (f"{dirname}/{firewall_name}.html", "w", encoding="utf-8") as fn:
             fn.write(result_html)
 
-        with open(f"{dirname}/{firewall['hostname']}.json", "w") as fn:
+        with open(f"{dirname}/{firewall['hostname']}.json", "w", encoding="utf-8") as fn:
             fn.write(json.dumps(results, indent=4))
 
     template = env.get_template("index.j2")
@@ -227,10 +329,10 @@ if __name__ == '__main__':
     firewall_list = [firewall['hostname'] for firewall in firewalls]
     index_html = template.render(status_dict=status_dict)
 
-    with open(f"{dirname}/index.html", "w") as fn:
+    with open(f"{dirname}/index.html", "w", encoding="utf-8") as fn:
         fn.write(index_html)
 
-    with open("results.json", "w") as fn:
+    with open("results.json", "w", encoding="utf-8") as fn:
         fn.write(json.dumps(status_dict))
 
 

@@ -1,0 +1,5 @@
+query {
+  devices(site: {{ site_list | tojson }}, manufacturer:"sophos",tag__n:"auxillary") {
+    name
+  }
+}

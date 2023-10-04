@@ -19,7 +19,7 @@ def eval_notifications(fw_obj: SophosFirewall,
     expected_settings = settings["notifications"]
     for i in range(1,3):
         try:
-            result = fw_obj.get_notification(verify=False)
+            result = fw_obj.get_notification()
         except Exception as err:
             logging.exception(f"Error while retrieving notification settings for firewall {fw_name}: {err}")
             if i < 3:

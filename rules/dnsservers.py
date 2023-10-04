@@ -20,7 +20,7 @@ def eval_dns_servers(fw_obj: SophosFirewall,
 
     for i in range(1,3):
         try:
-            result = fw_obj.get_dns_forwarders(verify=False)
+            result = fw_obj.get_dns_forwarders()
         except Exception as err:
             logging.exception(f"Error while retrieving authentication servers for firewall {fw_name}: {err}")
             if i < 3:

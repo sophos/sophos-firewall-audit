@@ -22,7 +22,7 @@ def eval_atp(fw_obj: SophosFirewall,
 
     for i in range(1,3):
         try:
-            result = fw_obj.get_tag("ATP", verify=False)
+            result = fw_obj.get_tag("ATP")
         except Exception as err:
             logging.exception(f"Error while retrieving active threat response configuration for firewall {fw_name}: {err}")
             if i < 3:
