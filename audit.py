@@ -93,7 +93,8 @@ def nb_graphql_query(query):
     nautobot = api(url=url, token=token)
     nautobot.http_session.verify=False
     graphql_response = nautobot.graphql.query(query=query)
-    return [{"hostname": firewall["name"], "port": "4444"} for firewall in graphql_response.json["data"]["devices"]]
+    return [{"hostname": firewall["name"], "port": "4444"} for firewall in graphql_response.json["data"]["devices"]
+            if firewall["device_type"]["_custom_field_data"]["network_os"] == "sfos"]
 
 def device_query(environ, devices):
     """Generate GraphQL query
