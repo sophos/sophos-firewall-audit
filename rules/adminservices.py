@@ -34,7 +34,10 @@ def eval_admin_services(fw_obj: SophosFirewall,
         break
 
     if "ApplianceAccess" in result["Response"]["Zone"]:
-        services = [service for service in result["Response"]["Zone"]["ApplianceAccess"]["AdminServices"].keys()]
+        if "AdminServices" in result["Response"]["Zone"]["AdminServices"]:
+            services = [service for service in result["Response"]["Zone"]["ApplianceAccess"]["AdminServices"].keys()]
+        else:
+            services = ["No services enabled"]
     else:
         services = ["No services enabled"]
 
