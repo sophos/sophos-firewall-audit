@@ -163,7 +163,7 @@ if __name__ == '__main__':
     group2.add_argument("-s", "--site_list", help="Comma separated list of Nautobot Sites for selection of devices")
     group2.add_argument("-r", "--region_list", help="Comma separated list of Nautobot Regions for selection of devices")
     group2.add_argument("-d", "--device_list", help="Comma separated list of Nautobot Devices")
-    group2.add_argument("-a", "--all_devices", help="All Sophos firewalls in Nautobot")
+    group2.add_argument("-a", "--all_devices", help="All Sophos firewalls in Nautobot", action="store_true")
 
     args = parser.parse_args()
     logging.info("Starting Sophos Firewall audit")
