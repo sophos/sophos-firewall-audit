@@ -217,7 +217,7 @@ if __name__ == '__main__':
         try:
             fw.login()
         except Exception as Error:
-            logging.error(f"Error connecting to firewall {firewall['hostname']}, skipping!")
+            logging.error(f"Error connecting to firewall {firewall['hostname']}: {Error}")
             continue
 
         results = []
