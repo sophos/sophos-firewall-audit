@@ -19,7 +19,7 @@ def eval_access_list(fw_obj: SophosFirewall,
     expected_hostgroups = sorted(settings["hostgroups"])
     expected_services = sorted(settings["services"])
 
-    for i in range(1,3):
+    for i in range(1,4):
         try:
             acl_result = fw_obj.get_acl_rule()
         except Exception as err:
@@ -27,7 +27,7 @@ def eval_access_list(fw_obj: SophosFirewall,
             if i < 3:
                 logging.info(f"Retry #{i}")
                 continue
-            else:
+            elif i == 3:
                 logging.exception("Unrecoverable error, exiting!")
                 sys.exit(1)
         break

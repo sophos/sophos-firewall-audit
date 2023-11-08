@@ -214,6 +214,12 @@ if __name__ == '__main__':
             verify=False
         )
 
+        try:
+            fw.login()
+        except Exception as Error:
+            logging.error(f"Error connecting to firewall {firewall['hostname']}, skipping!")
+            continue
+
         results = []
         output = []
         firewall_name = firewall["hostname"]
