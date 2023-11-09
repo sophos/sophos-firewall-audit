@@ -52,8 +52,8 @@ def eval_notifications(fw_obj: SophosFirewall,
             result_dict["notifications"]["status"] = "AUDIT_FAIL"
             result_dict["audit_result"] = "FAIL"
             result_dict["fail_ct"] += 1
-            print(f"expected_settings: {setting}: {expected_settings[setting]}")
-            print(f"actual_settings: {setting}: {actual_settings[setting]}")
+            # print(f"expected_settings: {setting}: {expected_settings[setting]}")
+            # print(f"actual_settings: {setting}: {actual_settings[setting]}")
     if result_dict["audit_result"] == "PASS":
         result_dict["pass_ct"] += 1
     output = []
