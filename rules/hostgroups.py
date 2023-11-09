@@ -38,7 +38,10 @@ def eval_hostgroups(fw_obj: SophosFirewall,
                     sys.exit(1)
             break
 
-        actual_hosts = sorted([host for host in result["Response"]["IPHostGroup"]["HostList"]["Host"]])
+        if "HostList" in result["Response"]["IPHostGroup"]:
+            actual_hosts = sorted([host for host in result["Response"]["IPHostGroup"]["HostList"]["Host"]])
+        else:
+            actual_hosts = ["Not Found"]
 
         result_dict["hostgroups"] =  {
                 "expected": expected_hosts,
