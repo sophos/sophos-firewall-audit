@@ -50,12 +50,19 @@ def eval_snmpv3(fw_obj: SophosFirewall,
     output = []
     for key in expected:
         status = "AUDIT_PASS"
-        if not expected[key] == actual[key]:
+        if key in actual:
+            if not expected[key] == actual[key]:
+                status = "AUDIT_FAIL"
+                result_dict["audit_result"] = "FAIL"
+                result_dict["fail_ct"] += 1
+            else:
+                result_dict["pass_ct"] += 1
+        else:
+            actual[key] = "None"
             status = "AUDIT_FAIL"
             result_dict["audit_result"] = "FAIL"
             result_dict["fail_ct"] += 1
-        else:
-            result_dict["pass_ct"] += 1
+
         output.append([
                 "SNMPv3",
                 "System > Administration > SNMP",
