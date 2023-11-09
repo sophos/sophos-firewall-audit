@@ -40,11 +40,12 @@ def eval_access_list(fw_obj: SophosFirewall,
         hostgroups = []
         services = []
         for acl in acl_result["Response"]["LocalServiceACL"]:
-            if isinstance(acl["Hosts"]["Host"], list):
-                for host in acl["Hosts"]["Host"]:
-                    hostgroups.append(host)
-            else:
-                hostgroups.append(acl["Hosts"]["Host"])
+            if "Hosts" in acl:
+                if isinstance(acl["Hosts"]["Host"], list):
+                    for host in acl["Hosts"]["Host"]:
+                        hostgroups.append(host)
+                else:
+                    hostgroups.append(acl["Hosts"]["Host"])
             if isinstance(acl["Services"]["Service"], list):
                 for service in acl["Services"]["Service"]:
                     services.append(service)
