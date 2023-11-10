@@ -254,7 +254,7 @@ syslog:
         ZeroDayProtectionEvents: Enable
 # Notification settings (System > Administration > Notification settings)
 notifications:
-  SenderAddress: us-bos-utm-stage-1@fw-notify.net
+  SenderAddress: do-not-reply@fw-notify.net
   AuthenticationRequired: Disable
   Port: "25"
   ConnectionSecurity: None
