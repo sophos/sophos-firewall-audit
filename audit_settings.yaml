@@ -348,7 +348,6 @@ notification_list:
 # Scheduled Backup Settings (System > Backup & firmware > Backup & restore)
 scheduled_backup:
   BackupMode: Mail  # FTP/Mail/Local
-  BackupPrefix: us-bos-utm-stag-1
   FtpPath:
   Username:
   FTPServer:
