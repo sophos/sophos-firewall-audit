@@ -51,6 +51,8 @@ def eval_access_list(fw_obj: SophosFirewall,
                     services.append(service)
             else:
                 services.append(acl["Services"]["Service"])
+            hostgroups = sorted(list(set(hostgroups)))
+            services = sorted(list(set(services)))
 
     result_dict = {
         "acl_hostgroups": {
