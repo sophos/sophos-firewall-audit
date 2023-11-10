@@ -395,8 +395,14 @@ dns_servers:
 
 # SNMPv3 (System > Administration > SNMP)
 snmpv3:
-  Username: test
+  Username: snmpv3_user
   AcceptQueries: Enable
   SendTraps: Enable
-  AuthorizedHosts: 10.1.1.1
+  AuthorizedHosts: 
+    - 10.104.67.14
+    - 10.104.79.31
+    - 10.200.67.12
+    - 10.200.79.40
+    - 10.224.67.40
+    - 10.224.69.5
   
