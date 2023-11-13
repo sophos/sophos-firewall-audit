@@ -11,6 +11,15 @@ Optional, for use with Nautobot as inventory:
 NAUTOBOT_URL = Nautobot URL
 NAUTOBOT_TOKEN = Nautobot API Token
 """
+# Patching prettytable to disable escaping
+import html
+html.escape = lambda *args, **kwargs: args[0]
+from prettytable import PrettyTable
+from prettytable import ALL
+from pynautobot import api
+from sophosfirewall_python.firewallapi import SophosFirewall
+from auth import get_credential
+import rules
 import os
 import logging
 from datetime import datetime
@@ -22,12 +31,8 @@ from rich.logging import RichHandler
 from rich.highlighter import RegexHighlighter
 from rich.theme import Theme
 from rich.console import Console
-from prettytable import PrettyTable
-from prettytable import ALL
-from pynautobot import api
-from sophosfirewall_python.firewallapi import SophosFirewall
-from auth import get_credential
-import rules
+
+
 
 class DeviceNameHighlighter(RegexHighlighter):
     """Apply style to the device name."""
