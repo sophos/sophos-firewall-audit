@@ -33,8 +33,8 @@ def eval_access_list(fw_obj: SophosFirewall,
         break
 
     if isinstance(acl_result["Response"]["LocalServiceACL"], dict):
-        hostgroups = sorted(acl_result["Response"]["LocalServiceACL"]["Hosts"]["Host"])
-        services = sorted(acl_result["Response"]["LocalServiceACL"]["Services"]["Service"])
+        hostgroups = sorted(list(set(acl_result["Response"]["LocalServiceACL"]["Hosts"]["Host"])))
+        services = sorted(list(set(acl_result["Response"]["LocalServiceACL"]["Services"]["Service"])))
 
     if isinstance(acl_result["Response"]["LocalServiceACL"], list):
         hostgroups = []
