@@ -112,7 +112,7 @@ def eval_loginsecurity(fw_obj: SophosFirewall,
                 for lvl3 in result[lvl1][lvl2]:
                     if "expected" in result[lvl1][lvl2][lvl3]:
                         if result[lvl1][lvl2][lvl3]["expected"] != result[lvl1][lvl2][lvl3]["actual"]:
-                            status = "AUDIT_FAIL",
+                            status = "AUDIT_FAIL"
                             result_dict["audit_result"] = "FAIL"
                             result_dict["fail_ct"] += 1
                         else:
