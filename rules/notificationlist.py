@@ -48,13 +48,15 @@ def eval_notification_list(fw_obj: SophosFirewall,
     actual_list = []
     for setting in expected_settings.keys():
         expected_list.append(f"{setting}: {expected_settings[setting]}")
-        actual_list.append(f"{setting}: {actual_settings[setting]}")
         if not expected_settings[setting] == actual_settings[setting]:
+            actual_list.append(f'<a style="color: red">{setting}: {actual_settings[setting]}</a>')
             result_dict["notification_list"]["status"] = "AUDIT_FAIL"
             result_dict["audit_result"] = "FAIL"
             result_dict["fail_ct"] += 1
             # print(f"expected_settings: {setting}: {expected_settings[setting]}")
             # print(f"actual_settings: {setting}: {actual_settings[setting]}")
+        else:
+            actual_list.append(f"{setting}: {actual_settings[setting]}")
     if result_dict["audit_result"] == "PASS":
         result_dict["pass_ct"] += 1
      
