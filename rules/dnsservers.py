@@ -33,7 +33,7 @@ def eval_dns_servers(fw_obj: SophosFirewall,
 
     server_list = result["Response"]["DNS"]["IPv4Settings"]["DNSIPList"]
     if server_list:
-        servers = sorted([server_list[key] for key in server_list.keys()])
+        servers = sorted([server_list[key] for key in server_list.keys() if server_list[key]])
     else:
         servers = None
 
