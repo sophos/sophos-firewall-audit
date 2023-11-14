@@ -1,4 +1,5 @@
 from sophosfirewall_python.firewallapi import SophosFirewall
+from utils import html_status
 import logging
 import sys
 
@@ -65,7 +66,7 @@ def eval_hostgroups(fw_obj: SophosFirewall,
                 f"IP Host Group: {host_group['name']}",
                 "\n".join(result_dict["hostgroups"]["expected"]),
                 "\n".join(result_dict["hostgroups"]["actual"]),
-                result_dict["hostgroups"]["status"]
+                html_status(result_dict["hostgroups"]["status"])
             ])
         
 

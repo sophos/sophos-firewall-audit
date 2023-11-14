@@ -1,4 +1,5 @@
 from sophosfirewall_python.firewallapi import SophosFirewall
+from utils import html_status
 import logging
 import sys
 
@@ -65,7 +66,7 @@ def eval_dns_servers(fw_obj: SophosFirewall,
             "Static DNS",
              "\n".join(result_dict["servers"]["expected"]),
              "\n".join(result_dict["servers"]["actual"]),
-             result_dict["servers"]["status"]
+             html_status(result_dict["servers"]["status"])
         ])
 
     logging.info(f"{fw_name}: DNS Servers Result: {result_dict['audit_result']}")

@@ -1,4 +1,5 @@
 from sophosfirewall_python.firewallapi import SophosFirewall
+from utils import html_status
 import logging
 import sys
 
@@ -58,7 +59,7 @@ def eval_ips_policies(fw_obj: SophosFirewall,
             "ips policies",
             "\n".join(result_dict["policies"]["expected"]),
             "\n".join(result_dict["policies"]["actual"]),
-            result_dict["policies"]["status"]
+            html_status(result_dict["policies"]["status"])
         ])
 
     logging.info(f"{fw_name}: IPS Policies Result: {result_dict['audit_result']}")

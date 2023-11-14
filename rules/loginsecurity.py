@@ -1,4 +1,5 @@
 from sophosfirewall_python.firewallapi import SophosFirewall
+from utils import html_status
 import logging
 import sys
 
@@ -89,7 +90,7 @@ def eval_loginsecurity(fw_obj: SophosFirewall,
                 "Login disclaimer settings",
                 f"{lvl1}: {result[lvl1]['expected']}",
                 f"{lvl1}: {result[lvl1]['actual']}",
-                status
+                html_status(status)
                 ])
                 continue
             for lvl2 in result[lvl1]:
@@ -106,7 +107,7 @@ def eval_loginsecurity(fw_obj: SophosFirewall,
                         lvl1,
                         f"{lvl2}: {result[lvl1][lvl2]['expected']}",
                         f"{lvl2}: {result[lvl1][lvl2]['actual']}",
-                        status
+                        html_status(status)
                         ])
                     continue
                 for lvl3 in result[lvl1][lvl2]:
@@ -123,7 +124,7 @@ def eval_loginsecurity(fw_obj: SophosFirewall,
                             f"{lvl1}\n{lvl2}",
                             f"{lvl3}: {result[lvl1][lvl2][lvl3]['expected']}",
                             f"{lvl3}: {result[lvl1][lvl2][lvl3]['actual']}",
-                            status
+                            html_status(status)
                             ])
 
     logging.info(f"{fw_name}: Login Security Result: {result_dict['audit_result']}")

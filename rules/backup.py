@@ -1,5 +1,5 @@
 from sophosfirewall_python.firewallapi import SophosFirewall
-from utils import html_red
+from utils import html_red, html_status
 import logging
 import sys
 
@@ -72,7 +72,7 @@ def eval_backup(fw_obj: SophosFirewall,
             "backup",
              "\n".join(expected_list),
              "\n".join(actual_list),
-             result_dict["backup"]["status"]
+             html_status(result_dict["backup"]["status"])
         ])
 
     logging.info(f"{fw_name}: Scheduled Backup Result: {result_dict['audit_result']}")

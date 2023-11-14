@@ -1,4 +1,5 @@
 from sophosfirewall_python.firewallapi import SophosFirewall, SophosFirewallZeroRecords
+from utils import html_status
 import logging
 import sys
 
@@ -69,7 +70,7 @@ def eval_snmpv3(fw_obj: SophosFirewall,
                 key,
                 '\n'.join(expected[key]) if key == "AuthorizedHosts" else expected[key],
                 '\n'.join(actual[key]) if key == "AuthorizedHosts" and actual[key] else actual[key],
-                status
+                html_status(status)
             ])
 
     logging.info(f"{fw_name}: SNMPv3 Result: {result_dict['audit_result']}")

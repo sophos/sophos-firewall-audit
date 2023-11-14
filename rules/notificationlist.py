@@ -1,5 +1,5 @@
 from sophosfirewall_python.firewallapi import SophosFirewall
-from utils import html_red
+from utils import html_red, html_status
 import logging
 import sys
 
@@ -69,7 +69,7 @@ def eval_notification_list(fw_obj: SophosFirewall,
             "notification list",
              "\n".join(expected_list),
              "\n".join(actual_list),
-             result_dict["notification_list"]["status"]
+             html_status(result_dict["notification_list"]["status"])
         ])
 
     logging.info(f"{fw_name}: Notification Settings Result: {result_dict['audit_result']}")

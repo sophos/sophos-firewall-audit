@@ -1,4 +1,5 @@
 from sophosfirewall_python.firewallapi import SophosFirewall
+from utils import html_status
 import logging
 import sys
 
@@ -93,7 +94,7 @@ def eval_access_list(fw_obj: SophosFirewall,
             "host groups",
              "\n".join(result_dict["acl_hostgroups"]["expected"]),
              "\n".join(result_dict["acl_hostgroups"]["actual"]),
-             result_dict["acl_hostgroups"]["status"]
+             html_status(result_dict["acl_hostgroups"]["status"])
         ])
 
     output.append([
@@ -102,7 +103,7 @@ def eval_access_list(fw_obj: SophosFirewall,
         "services",
             "\n".join(result_dict["acl_services"]["expected"]),
             "\n".join(result_dict["acl_services"]["actual"]),
-            result_dict["acl_services"]["status"]
+            html_status(result_dict["acl_services"]["status"])
     ])
     logging.info(f"{fw_name}: Access ACL Result: {result_dict['audit_result']}")
 

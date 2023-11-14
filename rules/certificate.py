@@ -1,5 +1,5 @@
 from sophosfirewall_python.firewallapi import SophosFirewall
-from utils import html_red
+from utils import html_red, html_status
 import logging
 import sys
 
@@ -69,7 +69,7 @@ def eval_certificate(fw_obj: SophosFirewall,
             "Admin console and end-user interaction",
              "\n".join(expected_list),
              "\n".join(actual_list),
-             result_dict["certificate"]["status"]
+             html_status(result_dict["certificate"]["status"])
         ])
 
     logging.info(f"{fw_name}: Certificate Result: {result_dict['audit_result']}")
