@@ -7,7 +7,7 @@ def html_red(text):
     Args:
         text (str): Text to surround with style
     """
-    return f'<a style="color: red">{text}</a>'
+    return f'<a style="color: red;">{text}</a>'
 
 def html_status(audit_status):
     """Apply red or green CSS style based on audit status
@@ -16,6 +16,6 @@ def html_status(audit_status):
         audit_status (str): AUDIT_PASS or AUDIT_FAIL
     """
     if audit_status == "AUDIT_PASS":
-        return f'<a style="color: green">{audit_status}</a>'
+        return f'<a style="color: lime; font-weight: bold;">{audit_status}</a>'
     if audit_status == "AUDIT_FAIL":
-        return f'<a style="color: red">{audit_status}</a>'
+        return f'<a style="color: red; font-weight: bold;">{audit_status}</a>'
