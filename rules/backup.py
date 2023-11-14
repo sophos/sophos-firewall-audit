@@ -52,7 +52,7 @@ def eval_backup(fw_obj: SophosFirewall,
             actual_settings[setting] = None
         expected_list.append(f"{setting}: {expected_settings[setting]}")
         
-        if not expected_settings[setting] == actual_settings[setting]:
+        if not expected_settings[setting].lower() == actual_settings[setting].lower():
             actual_list.append(f"{setting}: {html_red(actual_settings[setting])}")
             result_dict["backup"]["status"] = "AUDIT_FAIL"
             result_dict["fail_ct"] += 1
