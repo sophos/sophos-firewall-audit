@@ -16,6 +16,6 @@ def html_status(audit_status):
         audit_status (str): AUDIT_PASS or AUDIT_FAIL
     """
     if audit_status == "AUDIT_PASS":
-        return f'<a style"color: green">{audit_status}</a>'
+        return f'<a style="color: green">{audit_status}</a>'
     if audit_status == "AUDIT_FAIL":
-        return f'<a style"color: red">{audit_status}</a>'
+        return f'<a style="color: red">{audit_status}</a>'
