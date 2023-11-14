@@ -1,4 +1,5 @@
 from sophosfirewall_python.firewallapi import SophosFirewall
+from utils import html_red
 import logging
 import sys
 
@@ -67,12 +68,15 @@ def eval_syslog(fw_obj: SophosFirewall,
             category_actual = []
             for setting in result[category].keys():
                 category_expected.append(f"{setting}: {result[category][setting]['Expected']}")
-                category_actual.append(f"{setting}: {result[category][setting]['Actual']}")
+                
                 settings_type = result[category][setting]["Name"]
                 if not result[category][setting]['Expected'] == result[category][setting]['Actual']:
+                    category_actual.append(f"{setting}: {html_red(result[category][setting]['Actual'])}")
                     category_status = "AUDIT_FAIL"
                     result_dict["audit_result"] = "FAIL"
                     result_dict["fail_ct"] += 1
+                else:
+                    category_actual.append(f"{setting}: {result[category][setting]['Actual']}")
             if category_status == "AUDIT_PASS":
                 result_dict["pass_ct"] += 1
             output.append([

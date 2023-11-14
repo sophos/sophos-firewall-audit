@@ -12,6 +12,7 @@ NAUTOBOT_URL = Nautobot URL
 NAUTOBOT_TOKEN = Nautobot API Token
 """
 # Patching prettytable to disable escaping
+# https://github.com/jazzband/prettytable/issues/40
 import html
 html.escape = lambda *args, **kwargs: args[0]
 from prettytable import PrettyTable
@@ -328,7 +329,7 @@ if __name__ == '__main__':
         table.align["Actual"] = "l"
 
         template = env.get_template("results.j2")
-        result_html = template.render(firewall_name=firewall_name, table=table.get_html_string(format=True))
+        result_html = template.render(firewall_name=firewall_name, table=table.get_html_string(format=True, escape_data=False))
 
         with open (f"{dirname}/{firewall_name}.html", "w", encoding="utf-8") as fn:
             fn.write(result_html)

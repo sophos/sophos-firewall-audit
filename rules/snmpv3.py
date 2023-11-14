@@ -67,8 +67,8 @@ def eval_snmpv3(fw_obj: SophosFirewall,
                 "SNMPv3",
                 "System > Administration > SNMP",
                 key,
-                expected[key],
-                actual[key],
+                '\n'.join(expected[key]) if key == "AuthorizedHosts" else expected[key],
+                '\n'.join(actual[key]) if key == "AuthorizedHosts" and actual[key] else actual[key],
                 status
             ])
 

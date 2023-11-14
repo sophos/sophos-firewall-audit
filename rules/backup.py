@@ -1,4 +1,5 @@
 from sophosfirewall_python.firewallapi import SophosFirewall
+from utils import html_red
 import logging
 import sys
 
@@ -50,13 +51,16 @@ def eval_backup(fw_obj: SophosFirewall,
         if actual_settings[setting] == 'None':
             actual_settings[setting] = None
         expected_list.append(f"{setting}: {expected_settings[setting]}")
-        actual_list.append(f"{setting}: {actual_settings[setting]}")
+        
         if not expected_settings[setting] == actual_settings[setting]:
+            actual_list.append(f"{setting}: {html_red(actual_settings[setting])}")
             result_dict["backup"]["status"] = "AUDIT_FAIL"
             result_dict["fail_ct"] += 1
             result_dict["audit_result"] = "FAIL"
             # print(f"expected_settings: {setting}: {expected_settings[setting]}")
             # print(f"actual_settings: {setting}: {actual_settings[setting]}")
+        else:
+            actual_list.append(f"{setting}: {actual_settings[setting]}")
     if result_dict["audit_result"] == "PASS":
         result_dict["pass_ct"] += 1
      
