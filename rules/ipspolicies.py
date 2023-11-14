@@ -54,13 +54,18 @@ def eval_ips_policies(fw_obj: SophosFirewall,
     
     output = []
 
+    if result_dict["policies"]["status"] == "AUDIT_FAIL":
+        actual_output = "\n".join(unified_diff(result_dict["policies"]["expected"], 
+                                   result_dict["policies"]["actual"], fromfile="expected", tofile="actual"))
+    else:
+        actual_output = "\n".join(result_dict["policies"]["actual"])
+
     output.append([
             "IPS Policies",
             "(Protect > Intrusion prevention > IPS policies",
             "ips policies",
             "\n".join(result_dict["policies"]["expected"]),
-            "\n".join(unified_diff(result_dict["policies"]["expected"], 
-                                   result_dict["policies"]["actual"], fromfile="expected", tofile="actual")),
+            actual_output,
             html_status(result_dict["policies"]["status"])
         ])
 

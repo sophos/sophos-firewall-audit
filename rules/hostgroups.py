@@ -61,12 +61,17 @@ def eval_hostgroups(fw_obj: SophosFirewall,
         if result_dict["hostgroups"]["status"] == "AUDIT_FAIL":
             result_dict["audit_result"] = "FAIL"
 
+        if result_dict["hostgroups"]["status"] == "AUDIT_FAIL":
+            actual_output = "\n".join(unified_diff(result_dict["hostgroups"]["expected"], result_dict["hostgroups"]["actual"], fromfile="expected", tofile="actual"))
+        else:
+            actual_output = "\n".join(result_dict["hostgroups"]["actual"])
+
         output.append([
                 "IP Host Group",
                 "System > Hosts and services > IP host group",
                 f"IP Host Group: {host_group['name']}",
                 "\n".join(result_dict["hostgroups"]["expected"]),
-                "\n".join(unified_diff(result_dict["hostgroups"]["expected"], result_dict["hostgroups"]["actual"], fromfile="expected", tofile="actual")),
+                actual_output,
                 html_status(result_dict["hostgroups"]["status"])
             ])
         

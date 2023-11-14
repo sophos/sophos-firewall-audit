@@ -57,12 +57,17 @@ def eval_device_access_profile(fw_obj: SophosFirewall,
     
     output = []
 
+    if result_dict["profiles"]["status"] == "AUDIT_FAIL":
+        actual_output = "\n".join(unified_diff(result_dict["profiles"]["expected"], result_dict["profiles"]["actual"], fromfile="expected", tofile="actual"))
+    else:
+        actual_output = "\n".join(result_dict["profiles"]["actual"])
+
     output.append([
             "Device Access Profiles",
             "System > Profiles > Device Access",
             "profiles",
              "\n".join(result_dict["profiles"]["expected"]),
-             "\n".join(unified_diff(result_dict["profiles"]["expected"], result_dict["profiles"]["actual"], fromfile="expected", tofile="actual")),
+             actual_output,
              html_status(result_dict["profiles"]["status"])
         ])
 

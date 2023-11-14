@@ -65,12 +65,19 @@ def eval_snmpv3(fw_obj: SophosFirewall,
             result_dict["audit_result"] = "FAIL"
             result_dict["fail_ct"] += 1
 
+        if key == "AuthorizedHosts" and not actual[key] == None and status == "AUDIT_FAIL":
+            actual_output = '\n'.join(unified_diff(expected[key], actual[key], fromfile="expected", tofile="actual"))
+        elif key == "AuthorizedHosts" and not actual[key] == None and status == "AUDIT_PASS":
+            actual_output = '\n'.join(actual[key])
+        else:
+            actual_output = actual[key]
+
         output.append([
                 "SNMPv3",
                 "System > Administration > SNMP",
                 key,
                 '\n'.join(expected[key]) if key == "AuthorizedHosts" else expected[key],
-                '\n'.join(unified_diff(expected[key], actual[key], fromfile="expected", tofile="actual")) if key == "AuthorizedHosts" and not actual[key] == "None" else actual[key],
+                actual_output,
                 html_status(status)
             ])
 

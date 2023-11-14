@@ -61,12 +61,17 @@ def eval_dns_servers(fw_obj: SophosFirewall,
     
     output = []
 
+    if result_dict["servers"]["status"] == "AUDIT_FAIL":
+        actual_output = "\n".join(unified_diff(result_dict["servers"]["expected"], result_dict["servers"]["actual"], fromfile="expected", tofile="actual"))
+    else:
+        actual_output = "\n".join( result_dict["servers"]["actual"])
+
     output.append([
             "DNS Servers",
             "Configure > Network > DNS",
             "Static DNS",
              "\n".join(result_dict["servers"]["expected"]),
-             "\n".join(unified_diff(result_dict["servers"]["expected"], result_dict["servers"]["actual"], fromfile="expected", tofile="actual")),
+             actual_output,
              html_status(result_dict["servers"]["status"])
         ])
 

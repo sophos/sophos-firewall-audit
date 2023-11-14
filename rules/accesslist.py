@@ -89,21 +89,31 @@ def eval_access_list(fw_obj: SophosFirewall,
    
     output = []
 
+    if result_dict["acl_hostgroups"]["status"] == 'AUDIT_FAIL':
+        actual_output = "\n".join(unified_diff(result_dict["acl_hostgroups"]["expected"], result_dict["acl_hostgroups"]["actual"], fromfile="expected", tofile="actual"))
+    else:
+        actual_output = "\n".join(result_dict["acl_hostgroups"]["actual"])
+
     output.append([
             "Access ACL",
             "System > Administration > Device Access > \nLocal service ACL exception",
             "host groups",
              "\n".join(result_dict["acl_hostgroups"]["expected"]),
-             "\n".join(unified_diff(result_dict["acl_hostgroups"]["expected"], result_dict["acl_hostgroups"]["actual"], fromfile="expected", tofile="actual")),
+             actual_output,
              html_status(result_dict["acl_hostgroups"]["status"])
         ])
+
+    if result_dict["acl_services"]["status"] == "AUDIT_FAIL": 
+        actual_output = "\n".join(unified_diff(result_dict["acl_services"]["expected"], result_dict["acl_services"]["actual"], fromfile="expected", tofile="actual"))
+    else:
+        actual_output = "\n".join(result_dict["acl_services"]["actual"])
 
     output.append([
         "Access ACL",
         "System > Administration > Device Access > \nLocal service ACL exception",
         "services",
             "\n".join(result_dict["acl_services"]["expected"]),
-            "\n".join(unified_diff(result_dict["acl_services"]["expected"], result_dict["acl_services"]["actual"], fromfile="expected", tofile="actual")),
+            actual_output,
             html_status(result_dict["acl_services"]["status"])
     ])
     logging.info(f"{fw_name}: Access ACL Result: {result_dict['audit_result']}")
