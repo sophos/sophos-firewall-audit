@@ -1,5 +1,6 @@
 from sophosfirewall_python.firewallapi import SophosFirewall, SophosFirewallZeroRecords
 from utils import html_status
+from difflib import unified_diff
 import logging
 import sys
 
@@ -69,7 +70,7 @@ def eval_snmpv3(fw_obj: SophosFirewall,
                 "System > Administration > SNMP",
                 key,
                 '\n'.join(expected[key]) if key == "AuthorizedHosts" else expected[key],
-                '\n'.join(actual[key]) if key == "AuthorizedHosts" and not actual[key] == "None" else actual[key],
+                '\n'.join(unified_diff(expected[key], actual[key], fromfile="expected", tofile="actual")) if key == "AuthorizedHosts" and not actual[key] == "None" else actual[key],
                 html_status(status)
             ])
 

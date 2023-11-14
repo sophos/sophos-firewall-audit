@@ -66,7 +66,7 @@ def eval_hostgroups(fw_obj: SophosFirewall,
                 "System > Hosts and services > IP host group",
                 f"IP Host Group: {host_group['name']}",
                 "\n".join(result_dict["hostgroups"]["expected"]),
-                "\n".join(unified_diff(result_dict["hostgroups"]["expected"], result_dict["hostgroups"]["actual"])),
+                "\n".join(unified_diff(result_dict["hostgroups"]["expected"], result_dict["hostgroups"]["actual"], fromfile="expected", tofile="actual")),
                 html_status(result_dict["hostgroups"]["status"])
             ])
         

@@ -1,5 +1,6 @@
 from sophosfirewall_python.firewallapi import SophosFirewall
 from utils import html_status
+from difflib import unified_diff
 import logging
 import sys
 
@@ -61,7 +62,7 @@ def eval_device_access_profile(fw_obj: SophosFirewall,
             "System > Profiles > Device Access",
             "profiles",
              "\n".join(result_dict["profiles"]["expected"]),
-             "\n".join(result_dict["profiles"]["actual"]),
+             "\n".join(unified_diff(result_dict["profiles"]["expected"], result_dict["profiles"]["actual"], fromfile="expected", tofile="actual")),
              html_status(result_dict["profiles"]["status"])
         ])
 

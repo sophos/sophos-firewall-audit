@@ -1,5 +1,6 @@
 from sophosfirewall_python.firewallapi import SophosFirewall
 from utils import html_status
+from difflib import unified_diff
 import logging
 import sys
 
@@ -65,7 +66,7 @@ def eval_dns_servers(fw_obj: SophosFirewall,
             "Configure > Network > DNS",
             "Static DNS",
              "\n".join(result_dict["servers"]["expected"]),
-             "\n".join(result_dict["servers"]["actual"]),
+             "\n".join(unified_diff(result_dict["servers"]["expected"], result_dict["servers"]["actual"], fromfile="expected", tofile="actual")),
              html_status(result_dict["servers"]["status"])
         ])
 

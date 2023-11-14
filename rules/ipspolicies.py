@@ -1,5 +1,6 @@
 from sophosfirewall_python.firewallapi import SophosFirewall
 from utils import html_status
+from difflib import unified_diff
 import logging
 import sys
 
@@ -58,7 +59,8 @@ def eval_ips_policies(fw_obj: SophosFirewall,
             "(Protect > Intrusion prevention > IPS policies",
             "ips policies",
             "\n".join(result_dict["policies"]["expected"]),
-            "\n".join(result_dict["policies"]["actual"]),
+            "\n".join(unified_diff(result_dict["policies"]["expected"], 
+                                   result_dict["policies"]["actual"], fromfile="expected", tofile="actual")),
             html_status(result_dict["policies"]["status"])
         ])
 

@@ -1,5 +1,6 @@
 from sophosfirewall_python.firewallapi import SophosFirewall
 from utils import html_status
+from difflib import unified_diff
 import logging
 import sys
 
@@ -93,7 +94,7 @@ def eval_access_list(fw_obj: SophosFirewall,
             "System > Administration > Device Access > \nLocal service ACL exception",
             "host groups",
              "\n".join(result_dict["acl_hostgroups"]["expected"]),
-             "\n".join(result_dict["acl_hostgroups"]["actual"]),
+             "\n".join(unified_diff(result_dict["acl_hostgroups"]["expected"], result_dict["acl_hostgroups"]["actual"], fromfile="expected", tofile="actual")),
              html_status(result_dict["acl_hostgroups"]["status"])
         ])
 
@@ -102,7 +103,7 @@ def eval_access_list(fw_obj: SophosFirewall,
         "System > Administration > Device Access > \nLocal service ACL exception",
         "services",
             "\n".join(result_dict["acl_services"]["expected"]),
-            "\n".join(result_dict["acl_services"]["actual"]),
+            "\n".join(unified_diff(result_dict["acl_services"]["expected"], result_dict["acl_services"]["actual"], fromfile="expected", tofile="actual")),
             html_status(result_dict["acl_services"]["status"])
     ])
     logging.info(f"{fw_name}: Access ACL Result: {result_dict['audit_result']}")
