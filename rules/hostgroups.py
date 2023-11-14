@@ -1,5 +1,6 @@
 from sophosfirewall_python.firewallapi import SophosFirewall
 from utils import html_status
+from difflib import unified_diff
 import logging
 import sys
 
@@ -65,7 +66,7 @@ def eval_hostgroups(fw_obj: SophosFirewall,
                 "System > Hosts and services > IP host group",
                 f"IP Host Group: {host_group['name']}",
                 "\n".join(result_dict["hostgroups"]["expected"]),
-                "\n".join(result_dict["hostgroups"]["actual"]),
+                "\n".join(unified_diff(result_dict["hostgroups"]["expected"], result_dict["hostgroups"]["actual"])),
                 html_status(result_dict["hostgroups"]["status"])
             ])
         
