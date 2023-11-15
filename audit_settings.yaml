@@ -7,8 +7,8 @@ access_acl:
     - Sophos External ACL
     - All EAA Hosts
   services:
-    - 38
-    - 9
+    - "38"
+    - "9"
     - HTTPS
     - SSH
 # Device Access Profiles (System > Profiles > Device Access) 
