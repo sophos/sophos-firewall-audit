@@ -7,11 +7,10 @@ access_acl:
     - Sophos External ACL
     - All EAA Hosts
   services:
+    - 38
+    - 9
     - HTTPS
     - SSH
-    - UserPortal
-    - VPNPortal
-    - Ping
 # Device Access Profiles (System > Profiles > Device Access) 
 device_access_profile:
   profiles:
@@ -19,6 +18,8 @@ device_access_profile:
     - Audit Admin
     - Crypto Admin
     - HAProfile
+    - HelpdeskAdmin
+    - HelpdeskLimited
     - ReadOnly
     - Security Admin
 # Check for enabled services on the WAN zone (enter [] for none)
@@ -35,7 +36,17 @@ threat_protection:
 # IPS Policies (Protect > Intrusion prevention > IPS policies) 
 ips_policies:
   policies:
+    - DMZ TO LAN
+    - DMZ TO WAN
+    - General Policy
+    - LAN TO DMZ
+    - LAN TO WAN
+    - WAN TO DMZ
+    - WAN TO LAN
+    - dmzpolicy
     - generalpolicy
+    - lantowan_general
+    - lantowan_strict
 # Host groups - check host groups contain hosts listed here
 host_groups:
   groups:
@@ -178,7 +189,7 @@ syslog:
         ICMPErrorMessage: Disable
         IP-MACPairFiltering: Disable
         IPSpoofPrevention: Disable
-        InvalidTraffic: Enable
+        InvalidTraffic: Disable
         LocalACLs: Disable
         MACFiltering: Disable
         PolicyRules: Enable
