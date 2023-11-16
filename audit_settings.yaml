@@ -377,7 +377,7 @@ certificate:
   WebAdminSettings:
     Certificate: Webadmin-CA
     HTTPSport: "4444"
-    UserPortalHTTPSPort: "4443"
+    UserPortalHTTPSPort: "443"
     PortalRedirectMode: ip
     PortalCustomHostname: 
 
