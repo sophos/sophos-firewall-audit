@@ -1,5 +1,5 @@
 from sophosfirewall_python.firewallapi import SophosFirewall
-from utils import html_status
+from utils import html_status, format_diff
 from difflib import unified_diff
 import logging
 import sys
@@ -90,7 +90,8 @@ def eval_access_list(fw_obj: SophosFirewall,
     output = []
 
     if result_dict["acl_hostgroups"]["status"] == 'AUDIT_FAIL':
-        actual_output = "\n".join(unified_diff(result_dict["acl_hostgroups"]["expected"], result_dict["acl_hostgroups"]["actual"], fromfile="expected", tofile="actual"))
+        diff = unified_diff(result_dict["acl_hostgroups"]["expected"], result_dict["acl_hostgroups"]["actual"], n=100000000)
+        actual_output = "\n".join(format_diff(diff))
     else:
         actual_output = "\n".join(result_dict["acl_hostgroups"]["actual"])
 
@@ -103,8 +104,9 @@ def eval_access_list(fw_obj: SophosFirewall,
              html_status(result_dict["acl_hostgroups"]["status"])
         ])
 
-    if result_dict["acl_services"]["status"] == "AUDIT_FAIL": 
-        actual_output = "\n".join(unified_diff(result_dict["acl_services"]["expected"], result_dict["acl_services"]["actual"], fromfile="expected", tofile="actual"))
+    if result_dict["acl_services"]["status"] == "AUDIT_FAIL":
+        diff = unified_diff(result_dict["acl_services"]["expected"], result_dict["acl_services"]["actual"], n=100000000)
+        actual_output = "\n".join(format_diff(diff))
     else:
         actual_output = "\n".join(result_dict["acl_services"]["actual"])
 
