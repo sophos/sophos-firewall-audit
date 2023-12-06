@@ -1,8 +1,32 @@
 from sophosfirewall_python.firewallapi import SophosFirewall
-from utils import html_status
+from utils import html_status, html_red
 from difflib import unified_diff
 import logging
 import sys
+import re
+
+def format_diff(diff):
+    """Remove lines with ---, +++, @@ and style diff lines in red.
+
+    Args:
+        diff (list): A list containing the diff
+
+    Returns:
+        list: formatted output
+    """
+    output = []
+    for line in diff:
+        patterns = ["-{3}", "\+{3}", "\@{2}"]
+        for pattern in patterns:
+            match = re.match(pattern, line)
+            if match:
+                break
+        if not match:
+            if line.startswitch("-") or line.startswitch("+"):
+                output.append(html_red(line))
+            else:
+                output.append(line)
+    return output
 
 def eval_hostgroups(fw_obj: SophosFirewall,
                      fw_name: str,
@@ -62,7 +86,8 @@ def eval_hostgroups(fw_obj: SophosFirewall,
             result_dict["audit_result"] = "FAIL"
 
         if result_dict["hostgroups"]["status"] == "AUDIT_FAIL":
-            actual_output = "\n".join(unified_diff(result_dict["hostgroups"]["expected"], result_dict["hostgroups"]["actual"], fromfile="expected", tofile="actual"))
+            diff = "\n".join(unified_diff(result_dict["hostgroups"]["expected"], result_dict["hostgroups"]["actual"], n=100000000))
+            actual_output = format_diff(diff)
         else:
             actual_output = "\n".join(result_dict["hostgroups"]["actual"])
 
