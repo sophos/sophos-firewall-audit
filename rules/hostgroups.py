@@ -16,13 +16,13 @@ def format_diff(diff):
     """
     output = []
     for line in diff:
-        patterns = ["-{3}", "\+{3}", "\@{2}"]
+        patterns = ["-{3}", r"\+{3}", r"\@{2}"]
         for pattern in patterns:
             match = re.match(pattern, line)
             if match:
                 break
         if not match:
-            if line.startswitch("-") or line.startswitch("+"):
+            if line.startswith("-") or line.startswith("+"):
                 output.append(html_red(line))
             else:
                 output.append(line)
