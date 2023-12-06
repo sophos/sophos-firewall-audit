@@ -53,7 +53,7 @@ def eval_syslog(fw_obj: SophosFirewall,
                     settings_dict[settings_category][setting]["Actual"] = actual_settings[container_name][settings_category][setting]
                 else:
                     settings_dict[settings_category][setting]["Actual"] = f"{container_name} not configured!"
-            results.append(settings_dict)
+        results.append(settings_dict)
 
     result_dict = {
         "audit_result": "PASS",
