@@ -1,32 +1,8 @@
 from sophosfirewall_python.firewallapi import SophosFirewall
-from utils import html_status, html_red
+from utils import html_status, format_diff
 from difflib import unified_diff
 import logging
 import sys
-import re
-
-def format_diff(diff):
-    """Remove lines with ---, +++, @@ and style diff lines in red.
-
-    Args:
-        diff (list): A list containing the diff
-
-    Returns:
-        list: formatted output
-    """
-    output = []
-    for line in diff:
-        patterns = ["-{3}", r"\+{3}", r"\@{2}"]
-        for pattern in patterns:
-            match = re.match(pattern, line)
-            if match:
-                break
-        if not match:
-            if line.startswith("-") or line.startswith("+"):
-                output.append(html_red(line))
-            else:
-                output.append(line)
-    return output
 
 def eval_hostgroups(fw_obj: SophosFirewall,
                      fw_name: str,
