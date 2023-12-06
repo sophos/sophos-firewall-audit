@@ -40,16 +40,19 @@ def eval_syslog(fw_obj: SophosFirewall,
     results = []
     for settings_container in expected_settings:
         container_name = settings_container['name']
-        if container_name in actual_settings:
-            settings_dict = {}
-            for settings_category in settings_container['LogSettings']:
-                if not settings_category in settings_dict:
-                    settings_dict[settings_category] = {}
-                for setting in settings_container['LogSettings'][settings_category]:
-                    settings_dict[settings_category][setting] = {}
-                    settings_dict[settings_category][setting]["Name"] = container_name
-                    settings_dict[settings_category][setting]["Expected"] = settings_container['LogSettings'][settings_category][setting]
+    
+        settings_dict = {}
+        for settings_category in settings_container['LogSettings']:
+            if not settings_category in settings_dict:
+                settings_dict[settings_category] = {}
+            for setting in settings_container['LogSettings'][settings_category]:
+                settings_dict[settings_category][setting] = {}
+                settings_dict[settings_category][setting]["Name"] = container_name
+                settings_dict[settings_category][setting]["Expected"] = settings_container['LogSettings'][settings_category][setting]
+                if container_name in actual_settings:
                     settings_dict[settings_category][setting]["Actual"] = actual_settings[container_name][settings_category][setting]
+                else:
+                    settings_dict[settings_category][setting]["Actual"] = f"{container_name} not configured!"
             results.append(settings_dict)
 
     result_dict = {
