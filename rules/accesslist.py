@@ -1,4 +1,6 @@
 from sophosfirewall_python.firewallapi import SophosFirewall
+from utils import html_status, format_diff
+from difflib import unified_diff
 import logging
 import sys
 
@@ -19,7 +21,7 @@ def eval_access_list(fw_obj: SophosFirewall,
     expected_hostgroups = sorted(settings["hostgroups"])
     expected_services = sorted(settings["services"])
 
-    for i in range(1,3):
+    for i in range(1,4):
         try:
             acl_result = fw_obj.get_acl_rule()
         except Exception as err:
@@ -27,13 +29,32 @@ def eval_access_list(fw_obj: SophosFirewall,
             if i < 3:
                 logging.info(f"Retry #{i}")
                 continue
-            else:
+            elif i == 3:
                 logging.exception("Unrecoverable error, exiting!")
                 sys.exit(1)
         break
 
-    hostgroups = sorted(acl_result["Response"]["LocalServiceACL"]["Hosts"]["Host"])
-    services = sorted(acl_result["Response"]["LocalServiceACL"]["Services"]["Service"])
+    if isinstance(acl_result["Response"]["LocalServiceACL"], dict):
+        hostgroups = sorted(list(set(acl_result["Response"]["LocalServiceACL"]["Hosts"]["Host"])))
+        services = sorted(list(set(acl_result["Response"]["LocalServiceACL"]["Services"]["Service"])))
+
+    if isinstance(acl_result["Response"]["LocalServiceACL"], list):
+        hostgroups = []
+        services = []
+        for acl in acl_result["Response"]["LocalServiceACL"]:
+            if "Hosts" in acl:
+                if isinstance(acl["Hosts"]["Host"], list):
+                    for host in acl["Hosts"]["Host"]:
+                        hostgroups.append(host)
+                else:
+                    hostgroups.append(acl["Hosts"]["Host"])
+            if isinstance(acl["Services"]["Service"], list):
+                for service in acl["Services"]["Service"]:
+                    services.append(service)
+            else:
+                services.append(acl["Services"]["Service"])
+            hostgroups = sorted(list(set(hostgroups)))
+            services = sorted(list(set(services)))
 
     result_dict = {
         "acl_hostgroups": {
@@ -68,22 +89,34 @@ def eval_access_list(fw_obj: SophosFirewall,
    
     output = []
 
+    if result_dict["acl_hostgroups"]["status"] == 'AUDIT_FAIL':
+        diff = unified_diff(result_dict["acl_hostgroups"]["expected"], result_dict["acl_hostgroups"]["actual"], n=100000000)
+        actual_output = "\n".join(format_diff(diff))
+    else:
+        actual_output = "\n".join(result_dict["acl_hostgroups"]["actual"])
+
     output.append([
             "Access ACL",
             "System > Administration > Device Access > \nLocal service ACL exception",
             "host groups",
              "\n".join(result_dict["acl_hostgroups"]["expected"]),
-             "\n".join(result_dict["acl_hostgroups"]["actual"]),
-             result_dict["acl_hostgroups"]["status"]
+             actual_output,
+             html_status(result_dict["acl_hostgroups"]["status"])
         ])
+
+    if result_dict["acl_services"]["status"] == "AUDIT_FAIL":
+        diff = unified_diff(result_dict["acl_services"]["expected"], result_dict["acl_services"]["actual"], n=100000000)
+        actual_output = "\n".join(format_diff(diff))
+    else:
+        actual_output = "\n".join(result_dict["acl_services"]["actual"])
 
     output.append([
         "Access ACL",
         "System > Administration > Device Access > \nLocal service ACL exception",
         "services",
             "\n".join(result_dict["acl_services"]["expected"]),
-            "\n".join(result_dict["acl_services"]["actual"]),
-            result_dict["acl_services"]["status"]
+            actual_output,
+            html_status(result_dict["acl_services"]["status"])
     ])
     logging.info(f"{fw_name}: Access ACL Result: {result_dict['audit_result']}")
 

@@ -1,4 +1,6 @@
 from sophosfirewall_python.firewallapi import SophosFirewall
+from utils import html_status, format_diff
+from difflib import unified_diff
 import logging
 import sys
 
@@ -55,13 +57,19 @@ def eval_device_access_profile(fw_obj: SophosFirewall,
     
     output = []
 
+    if result_dict["profiles"]["status"] == "AUDIT_FAIL":
+        diff = unified_diff(result_dict["profiles"]["expected"], result_dict["profiles"]["actual"], n=100000000)
+        actual_output = "\n".join(format_diff(diff))
+    else:
+        actual_output = "\n".join(result_dict["profiles"]["actual"])
+
     output.append([
             "Device Access Profiles",
             "System > Profiles > Device Access",
             "profiles",
              "\n".join(result_dict["profiles"]["expected"]),
-             "\n".join(result_dict["profiles"]["actual"]),
-             result_dict["profiles"]["status"]
+             actual_output,
+             html_status(result_dict["profiles"]["status"])
         ])
 
     logging.info(f"{fw_name}: Device Access Profiles Result: {result_dict['audit_result']}")

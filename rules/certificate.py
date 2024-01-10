@@ -1,4 +1,5 @@
 from sophosfirewall_python.firewallapi import SophosFirewall
+from utils import html_red, html_status
 import logging
 import sys
 
@@ -48,15 +49,19 @@ def eval_certificate(fw_obj: SophosFirewall,
     actual_list = []
     for setting in expected_settings.keys():
         expected_list.append(f"{setting}: {expected_settings[setting]}")
-        actual_list.append(f"{setting}: {actual_settings[setting]}")
+        
         if not expected_settings[setting] == actual_settings[setting]:
+            actual_list.append(f"{setting}: {html_red(actual_settings[setting])}")
             result_dict["certificate"]["status"] = "AUDIT_FAIL"
-            result_dict["fail_ct"] += 1
             result_dict["audit_result"] = "FAIL"
             # print(f"expected_settings: {setting}: {expected_settings[setting]}")
             # print(f"actual_settings: {setting}: {actual_settings[setting]}")
+        else:
+            actual_list.append(f"{setting}: {actual_settings[setting]}")
     if result_dict["audit_result"] == "PASS":
         result_dict["pass_ct"] += 1
+    else:
+        result_dict["fail_ct"] += 1
     output = []
 
     output.append([
@@ -65,7 +70,7 @@ def eval_certificate(fw_obj: SophosFirewall,
             "Admin console and end-user interaction",
              "\n".join(expected_list),
              "\n".join(actual_list),
-             result_dict["certificate"]["status"]
+             html_status(result_dict["certificate"]["status"])
         ])
 
     logging.info(f"{fw_name}: Certificate Result: {result_dict['audit_result']}")

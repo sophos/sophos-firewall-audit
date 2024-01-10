@@ -1,4 +1,5 @@
 from sophosfirewall_python.firewallapi import SophosFirewall
+from utils import html_red, html_status
 import logging
 import sys
 
@@ -39,6 +40,7 @@ def eval_syslog(fw_obj: SophosFirewall,
     results = []
     for settings_container in expected_settings:
         container_name = settings_container['name']
+    
         settings_dict = {}
         for settings_category in settings_container['LogSettings']:
             if not settings_category in settings_dict:
@@ -47,7 +49,10 @@ def eval_syslog(fw_obj: SophosFirewall,
                 settings_dict[settings_category][setting] = {}
                 settings_dict[settings_category][setting]["Name"] = container_name
                 settings_dict[settings_category][setting]["Expected"] = settings_container['LogSettings'][settings_category][setting]
-                settings_dict[settings_category][setting]["Actual"] = actual_settings[container_name][settings_category][setting]
+                if container_name in actual_settings:
+                    settings_dict[settings_category][setting]["Actual"] = actual_settings[container_name][settings_category][setting]
+                else:
+                    settings_dict[settings_category][setting]["Actual"] = f"{container_name} not configured!"
         results.append(settings_dict)
 
     result_dict = {
@@ -66,21 +71,25 @@ def eval_syslog(fw_obj: SophosFirewall,
             category_actual = []
             for setting in result[category].keys():
                 category_expected.append(f"{setting}: {result[category][setting]['Expected']}")
-                category_actual.append(f"{setting}: {result[category][setting]['Actual']}")
+                
                 settings_type = result[category][setting]["Name"]
                 if not result[category][setting]['Expected'] == result[category][setting]['Actual']:
+                    category_actual.append(f"{setting}: {html_red(result[category][setting]['Actual'])}")
                     category_status = "AUDIT_FAIL"
                     result_dict["audit_result"] = "FAIL"
-                    result_dict["fail_ct"] += 1
+                else:
+                    category_actual.append(f"{setting}: {result[category][setting]['Actual']}")
             if category_status == "AUDIT_PASS":
                 result_dict["pass_ct"] += 1
+            else:
+                result_dict["fail_ct"] += 1
             output.append([
                 "Syslog",
                 "Configure > System services > Log settings",
                 f"{settings_type}\n{category}",
                 "\n".join(category_expected),
                 "\n".join(category_actual),
-                category_status
+                html_status(category_status)
             ])
 
     logging.info(f"{fw_name}: Syslog Result: {result_dict['audit_result']}")

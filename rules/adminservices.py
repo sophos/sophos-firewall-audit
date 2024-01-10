@@ -1,4 +1,5 @@
 from sophosfirewall_python.firewallapi import SophosFirewall
+from utils import html_status
 import logging
 import sys
 
@@ -34,7 +35,10 @@ def eval_admin_services(fw_obj: SophosFirewall,
         break
 
     if "ApplianceAccess" in result["Response"]["Zone"]:
-        services = [service for service in result["Response"]["Zone"]["ApplianceAccess"]["AdminServices"].keys()]
+        if "AdminServices" in result["Response"]["Zone"]["ApplianceAccess"]:
+            services = [service for service in result["Response"]["Zone"]["ApplianceAccess"]["AdminServices"].keys()]
+        else:
+            services = ["No services enabled"]
     else:
         services = ["No services enabled"]
 
@@ -66,7 +70,7 @@ def eval_admin_services(fw_obj: SophosFirewall,
             "admin services",
              "\n".join(result_dict["services"]["expected"]),
              "\n".join(result_dict["services"]["actual"]),
-             result_dict["services"]["status"]
+             html_status(result_dict["services"]["status"])
         ])
 
     logging.info(f"{fw_name}: WAN Zone Admin Services Result: {result_dict['audit_result']}")

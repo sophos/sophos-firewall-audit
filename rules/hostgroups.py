@@ -1,4 +1,6 @@
 from sophosfirewall_python.firewallapi import SophosFirewall
+from utils import html_status, format_diff
+from difflib import unified_diff
 import logging
 import sys
 
@@ -38,7 +40,10 @@ def eval_hostgroups(fw_obj: SophosFirewall,
                     sys.exit(1)
             break
 
-        actual_hosts = sorted([host for host in result["Response"]["IPHostGroup"]["HostList"]["Host"]])
+        if "HostList" in result["Response"]["IPHostGroup"]:
+            actual_hosts = sorted([host for host in result["Response"]["IPHostGroup"]["HostList"]["Host"]])
+        else:
+            actual_hosts = ["Not Found"]
 
         result_dict["hostgroups"] =  {
                 "expected": expected_hosts,
@@ -56,13 +61,19 @@ def eval_hostgroups(fw_obj: SophosFirewall,
         if result_dict["hostgroups"]["status"] == "AUDIT_FAIL":
             result_dict["audit_result"] = "FAIL"
 
+        if result_dict["hostgroups"]["status"] == "AUDIT_FAIL":
+            diff = unified_diff(result_dict["hostgroups"]["expected"], result_dict["hostgroups"]["actual"], n=100000000)
+            actual_output = "\n".join(format_diff(diff))
+        else:
+            actual_output = "\n".join(result_dict["hostgroups"]["actual"])
+
         output.append([
                 "IP Host Group",
                 "System > Hosts and services > IP host group",
                 f"IP Host Group: {host_group['name']}",
                 "\n".join(result_dict["hostgroups"]["expected"]),
-                "\n".join(result_dict["hostgroups"]["actual"]),
-                result_dict["hostgroups"]["status"]
+                actual_output,
+                html_status(result_dict["hostgroups"]["status"])
             ])
         
 

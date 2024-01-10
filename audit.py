@@ -11,6 +11,16 @@ Optional, for use with Nautobot as inventory:
 NAUTOBOT_URL = Nautobot URL
 NAUTOBOT_TOKEN = Nautobot API Token
 """
+# Patching prettytable to disable escaping
+# https://github.com/jazzband/prettytable/issues/40
+import html
+html.escape = lambda *args, **kwargs: args[0]
+from prettytable import PrettyTable
+from prettytable import ALL
+from pynautobot import api
+from sophosfirewall_python.firewallapi import SophosFirewall
+from auth import get_credential
+import rules
 import os
 import logging
 from datetime import datetime
@@ -22,12 +32,8 @@ from rich.logging import RichHandler
 from rich.highlighter import RegexHighlighter
 from rich.theme import Theme
 from rich.console import Console
-from prettytable import PrettyTable
-from prettytable import ALL
-from pynautobot import api
-from sophosfirewall_python.firewallapi import SophosFirewall
-from auth import get_credential
-import rules
+
+
 
 class DeviceNameHighlighter(RegexHighlighter):
     """Apply style to the device name."""
@@ -214,6 +220,12 @@ if __name__ == '__main__':
             verify=False
         )
 
+        try:
+            fw.login()
+        except Exception as Error:
+            logging.error(f"Error connecting to firewall {firewall['hostname']}: {Error}")
+            continue
+
         results = []
         output = []
         firewall_name = firewall["hostname"]
@@ -317,7 +329,7 @@ if __name__ == '__main__':
         table.align["Actual"] = "l"
 
         template = env.get_template("results.j2")
-        result_html = template.render(firewall_name=firewall_name, table=table.get_html_string(format=True))
+        result_html = template.render(firewall_name=firewall_name, table=table.get_html_string(format=True, escape_data=False))
 
         with open (f"{dirname}/{firewall_name}.html", "w", encoding="utf-8") as fn:
             fn.write(result_html)

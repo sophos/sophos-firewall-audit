@@ -1,4 +1,6 @@
 from sophosfirewall_python.firewallapi import SophosFirewall
+from utils import html_status
+from utils import html_red
 import logging
 import sys
 
@@ -79,8 +81,9 @@ def eval_atp(fw_obj: SophosFirewall,
             "Protect > Active threat response > Sophos X-Ops threat feeds",
             "enabled/disabled",
              result_dict["atp"]["state"]["expected"],
-             result_dict["atp"]["state"]["actual"],
-             result_dict["atp"]["state"]["status"]
+             html_red(result_dict["atp"]["state"]["actual"]) if result_dict["atp"]["state"]["status"] == "AUDIT_FAIL"
+               else result_dict["atp"]["state"]["actual"],
+             html_status(result_dict["atp"]["state"]["status"])
         ])
     
     output.append([
@@ -88,8 +91,9 @@ def eval_atp(fw_obj: SophosFirewall,
             "Protect > Active threat response > Sophos X-Ops threat feeds",
             "action",
              result_dict["atp"]["policy"]["expected"],
-             result_dict["atp"]["policy"]["actual"],
-             result_dict["atp"]["policy"]["status"]
+             html_red(result_dict["atp"]["policy"]["actual"]) if result_dict["atp"]["policy"]["status"] == "AUDIT_FAIL"
+              else result_dict["atp"]["policy"]["actual"],
+             html_status(result_dict["atp"]["policy"]["status"])
         ])
 
     logging.info(f"{fw_name}: Active Threat Response Result: {result_dict['audit_result']}")

@@ -1,4 +1,6 @@
 from sophosfirewall_python.firewallapi import SophosFirewall, SophosFirewallZeroRecords
+from utils import html_status, format_diff
+from difflib import unified_diff
 import logging
 import sys
 
@@ -50,19 +52,33 @@ def eval_snmpv3(fw_obj: SophosFirewall,
     output = []
     for key in expected:
         status = "AUDIT_PASS"
-        if not expected[key] == actual[key]:
+        if key in actual:
+            if not expected[key] == actual[key]:
+                status = "AUDIT_FAIL"
+                result_dict["audit_result"] = "FAIL"
+                result_dict["fail_ct"] += 1
+            else:
+                result_dict["pass_ct"] += 1
+        else:
+            actual[key] = "None"
             status = "AUDIT_FAIL"
             result_dict["audit_result"] = "FAIL"
             result_dict["fail_ct"] += 1
+
+        if key == "AuthorizedHosts" and not actual[key] == "None" and status == "AUDIT_FAIL":
+            actual_output = '\n'.join(format_diff(unified_diff(expected[key], actual[key], n=1000000000)))
+        elif key == "AuthorizedHosts" and not actual[key] == "None" and status == "AUDIT_PASS":
+            actual_output = '\n'.join(actual[key])
         else:
-            result_dict["pass_ct"] += 1
+            actual_output = actual[key]
+
         output.append([
                 "SNMPv3",
                 "System > Administration > SNMP",
                 key,
-                expected[key],
-                actual[key],
-                status
+                '\n'.join(expected[key]) if key == "AuthorizedHosts" else expected[key],
+                actual_output,
+                html_status(status)
             ])
 
     logging.info(f"{fw_name}: SNMPv3 Result: {result_dict['audit_result']}")

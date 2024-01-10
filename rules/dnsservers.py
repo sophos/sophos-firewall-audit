@@ -1,4 +1,6 @@
 from sophosfirewall_python.firewallapi import SophosFirewall
+from utils import html_status, format_diff
+from difflib import unified_diff
 import logging
 import sys
 
@@ -32,7 +34,10 @@ def eval_dns_servers(fw_obj: SophosFirewall,
         break
 
     server_list = result["Response"]["DNS"]["IPv4Settings"]["DNSIPList"]
-    servers = sorted([server_list[key] for key in server_list.keys()])
+    if server_list:
+        servers = sorted([server_list[key] for key in server_list.keys() if server_list[key]])
+    else:
+        servers = None
 
     result_dict = {
         "servers": {
@@ -56,13 +61,19 @@ def eval_dns_servers(fw_obj: SophosFirewall,
     
     output = []
 
+    if result_dict["servers"]["status"] == "AUDIT_FAIL":
+        diff = unified_diff(result_dict["servers"]["expected"], result_dict["servers"]["actual"], n=1000000000)
+        actual_output = "\n".join(format_diff(diff))
+    else:
+        actual_output = "\n".join( result_dict["servers"]["actual"])
+
     output.append([
             "DNS Servers",
             "Configure > Network > DNS",
             "Static DNS",
              "\n".join(result_dict["servers"]["expected"]),
-             "\n".join(result_dict["servers"]["actual"]),
-             result_dict["servers"]["status"]
+             actual_output,
+             html_status(result_dict["servers"]["status"])
         ])
 
     logging.info(f"{fw_name}: DNS Servers Result: {result_dict['audit_result']}")

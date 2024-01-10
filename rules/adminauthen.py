@@ -1,4 +1,5 @@
 from sophosfirewall_python.firewallapi import SophosFirewall
+from utils import html_status
 import logging
 import sys
 
@@ -62,7 +63,7 @@ def eval_admin_authen(fw_obj: SophosFirewall,
             "servers",
              "\n".join(result_dict["servers"]["expected"]),
              "\n".join(result_dict["servers"]["actual"]),
-             result_dict["servers"]["status"]
+             html_status(result_dict["servers"]["status"])
         ])
 
     logging.info(f"{fw_name}: Authentication Servers Result: {result_dict['audit_result']}")

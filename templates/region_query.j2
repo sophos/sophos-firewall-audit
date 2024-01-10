@@ -1,5 +1,5 @@
 query {
-  devices(region: {{ region_list | tojson }}, manufacturer:"sophos", tag__n:"auxillary") {
+  devices(region: {{ region_list | tojson }}, manufacturer:"sophos", tag__n:"auxillary", status:"active") {
     name
     device_type {
       _custom_field_data

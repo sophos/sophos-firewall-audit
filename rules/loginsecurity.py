@@ -1,11 +1,11 @@
 from sophosfirewall_python.firewallapi import SophosFirewall
+from utils import html_status, html_red
 import logging
 import sys
 
-def eval_loginsecurity(fw_obj: SophosFirewall,
-                     fw_name: str,
-                      settings: dict):
-    """Verify Login Security (System > Administration > Admin and user settings) 
+
+def eval_loginsecurity(fw_obj: SophosFirewall, fw_name: str, settings: dict):
+    """Verify Login Security (System > Administration > Admin and user settings)
 
     Args:
         fw_obj (SophosFirewall): SophosFirewall object
@@ -17,11 +17,13 @@ def eval_loginsecurity(fw_obj: SophosFirewall,
     """
     output = []
 
-    for i in range(1,3):
+    for i in range(1, 3):
         try:
             result = fw_obj.get_admin_settings()
         except Exception as err:
-            logging.exception(f"Error while retrieving Admin settings for firewall {fw_name}: {err}")
+            logging.exception(
+                f"Error while retrieving Admin settings for firewall {fw_name}: {err}"
+            )
             if i < 3:
                 logging.info(f"Retry #{i}")
                 continue
@@ -35,7 +37,9 @@ def eval_loginsecurity(fw_obj: SophosFirewall,
     result["Response"]["AdminSettings"].pop("HostnameSettings")
     actual_settings = {}
     for settings_group in result["Response"]["AdminSettings"]:
-        actual_settings[settings_group] = result["Response"]["AdminSettings"][settings_group]
+        actual_settings[settings_group] = result["Response"]["AdminSettings"][
+            settings_group
+        ]
 
     expected_settings = settings["login_security"]
 
@@ -49,11 +53,19 @@ def eval_loginsecurity(fw_obj: SophosFirewall,
                 if isinstance(expected_settings[key][category], dict):
                     for subcategory in expected_settings[key][category]:
                         settings_dict[key][category][subcategory] = {}
-                        settings_dict[key][category][subcategory]["expected"] = expected_settings[key][category][subcategory]
-                        settings_dict[key][category][subcategory]["actual"] = actual_settings[key][category][subcategory]
+                        settings_dict[key][category][subcategory][
+                            "expected"
+                        ] = expected_settings[key][category][subcategory]
+                        settings_dict[key][category][subcategory][
+                            "actual"
+                        ] = actual_settings[key][category][subcategory]
                 else:
-                    settings_dict[key][category]["expected"] = expected_settings[key][category]
-                    settings_dict[key][category]["actual"] = actual_settings[key][category]
+                    settings_dict[key][category]["expected"] = expected_settings[key][
+                        category
+                    ]
+                    settings_dict[key][category]["actual"] = actual_settings[key][
+                        category
+                    ]
 
                 results.append(settings_dict)
         else:
@@ -63,16 +75,12 @@ def eval_loginsecurity(fw_obj: SophosFirewall,
             settings_dict[key]["actual"] = actual_settings[key]
             results.append(settings_dict)
 
-
     result_dict = {
         "audit_result": "PASS",
         "pass_ct": 0,
         "fail_ct": 0,
-        "loginsecurity": {
-                "expected": expected_settings,
-                "actual": actual_settings
-            } 
-        }
+        "loginsecurity": {"expected": expected_settings, "actual": actual_settings},
+    }
     for result in results:
         status = "AUDIT_PASS"
         for lvl1 in result:
@@ -83,14 +91,16 @@ def eval_loginsecurity(fw_obj: SophosFirewall,
                     result_dict["fail_ct"] += 1
                 else:
                     result_dict["pass_ct"] += 1
-                output.append([
-                "Admin and user settings",
-                "System > Administration > Admin and user settings",
-                "Login disclaimer settings",
-                f"{lvl1}: {result[lvl1]['expected']}",
-                f"{lvl1}: {result[lvl1]['actual']}",
-                status
-                ])
+                output.append(
+                    [
+                        "Admin and user settings",
+                        "System > Administration > Admin and user settings",
+                        "Login disclaimer settings",
+                        f"{lvl1}: {result[lvl1]['expected']}",
+                        f"{lvl1}: {html_red(result[lvl1]['actual']) if status == 'AUDIT_FAIL' else result[lvl1]['actual']}",
+                        html_status(status),
+                    ]
+                )
                 continue
             for lvl2 in result[lvl1]:
                 if "expected" in result[lvl1][lvl2]:
@@ -100,31 +110,38 @@ def eval_loginsecurity(fw_obj: SophosFirewall,
                         result_dict["fail_ct"] += 1
                     else:
                         result_dict["pass_ct"] += 1
-                    output.append([
-                        "Admin and user settings",
-                        "System > Administration > Admin and user settings",
-                        lvl1,
-                        f"{lvl2}: {result[lvl1][lvl2]['expected']}",
-                        f"{lvl2}: {result[lvl1][lvl2]['actual']}",
-                        status
-                        ])
+                    output.append(
+                        [
+                            "Admin and user settings",
+                            "System > Administration > Admin and user settings",
+                            lvl1,
+                            f"{lvl2}: {result[lvl1][lvl2]['expected']}",
+                            f"{lvl2}: {html_red(result[lvl1][lvl2]['actual']) if status == 'AUDIT_FAIL' else result[lvl1][lvl2]['actual']}",
+                            html_status(status),
+                        ]
+                    )
                     continue
                 for lvl3 in result[lvl1][lvl2]:
                     if "expected" in result[lvl1][lvl2][lvl3]:
-                        if result[lvl1][lvl2][lvl3]["expected"] != result[lvl1][lvl2][lvl3]["actual"]:
-                            status = "AUDIT_FAIL",
+                        if (
+                            result[lvl1][lvl2][lvl3]["expected"]
+                            != result[lvl1][lvl2][lvl3]["actual"]
+                        ):
+                            status = "AUDIT_FAIL"
                             result_dict["audit_result"] = "FAIL"
                             result_dict["fail_ct"] += 1
                         else:
                             result_dict["pass_ct"] += 1
-                        output.append([
-                            "Admin and user settings",
-                            "System > Administration > Admin and user settings",
-                            f"{lvl1}\n{lvl2}",
-                            f"{lvl3}: {result[lvl1][lvl2][lvl3]['expected']}",
-                            f"{lvl3}: {result[lvl1][lvl2][lvl3]['actual']}",
-                            status
-                            ])
+                        output.append(
+                            [
+                                "Admin and user settings",
+                                "System > Administration > Admin and user settings",
+                                f"{lvl1}\n{lvl2}",
+                                f"{lvl3}: {result[lvl1][lvl2][lvl3]['expected']}",
+                                f"{lvl3}: {html_red(result[lvl1][lvl2][lvl3]['actual']) if status == 'AUDIT_FAIL' else result[lvl1][lvl2][lvl3]['actual']}",
+                                html_status(status),
+                            ]
+                        )
 
     logging.info(f"{fw_name}: Login Security Result: {result_dict['audit_result']}")
 
