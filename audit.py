@@ -243,6 +243,11 @@ if __name__ == '__main__':
                 "log_msg": "Evaluate Access ACL"
             },
             {
+                "method": rules.eval_central_mgmt, 
+                "settings": audit_settings,
+                "log_msg": "Evaluate Central Management"
+            },
+            {
                 "method": rules.eval_device_access_profile,
                 "settings": audit_settings["device_access_profile"],
                 "log_msg": "Evaluate Device Access Profiles"
@@ -256,6 +261,11 @@ if __name__ == '__main__':
                 "method": rules.eval_admin_authen,
                 "settings": audit_settings["authen_servers"],
                 "log_msg": "Evaluate Authentication Servers"
+            },
+            {
+                "method": rules.eval_malware_protection,
+                "settings": audit_settings["malware_protection"],
+                "log_msg": "Evaluate Malware Protection Antivirus Engine"
             },
             {
                 "method": rules.eval_atp,
@@ -308,11 +318,20 @@ if __name__ == '__main__':
                 "log_msg": "Evaluate DNS Servers"
             },
             {
+                "method": rules.eval_smtp_protection,
+                "settings": audit_settings,
+                "log_msg": "Evaluate SMTP Protection"
+            },
+            {
                 "method": rules.eval_snmpv3,
                 "settings": audit_settings,
                 "log_msg": "Evaluate SNMPv3"
+            },
+            {
+                "method": rules.eval_time,
+                "settings": audit_settings['time'],
+                "log_msg": "Evaluate Time Settings"
             }
-
         ]
         for rule in rule_list:
             result = process_rule(rule["method"], rule["settings"], rule["log_msg"], fw, status_dict)

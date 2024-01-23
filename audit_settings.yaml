@@ -11,6 +11,13 @@ access_acl:
     - "9"
     - HTTPS
     - SSH
+# Central Management (System > Sophos Central)
+central_management:
+  FWBackup: BackupEnable
+  JoinMethod: Manual
+  UseCentralReporting: Enable
+  CMStatus: Enable
+
 # Device Access Profiles (System > Profiles > Device Access) 
 device_access_profile:
   profiles:
@@ -33,8 +40,13 @@ authen_servers:
 threat_protection:
   state: Enable
   policy: Log and Drop
+# Malware protection settings (Configure > System services > Malware Protection)
+malware_protection:
+  antivirus_engine: Sophos
+
 # IPS Policies (Protect > Intrusion prevention > IPS policies) 
 ips_policies:
+  status: Enable
   policies:
     - DMZ TO LAN
     - DMZ TO WAN
@@ -408,4 +420,11 @@ snmpv3:
     - 10.200.79.40
     - 10.224.67.40
     - 10.224.69.5
-  
+
+# Time Settings (System > Administration > Time)
+time:
+  timezone: Europe/Dublin
+
+# SMTP Protection Settings (Protect > Email > General Settings)
+smtp_protect:
+  mta_mode: "ON"

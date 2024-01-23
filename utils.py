@@ -11,6 +11,14 @@ def html_red(text):
     """
     return f'<a style="color: red;">{text}</a>'
 
+def html_yellow(text):
+    """Apply red CSS style to text.
+
+    Args:
+        text (str): Text to surround with style
+    """
+    return f'<a style="color: yellow;">{text}</a>'
+
 def html_status(audit_status):
     """Apply red or green CSS style based on audit status
 
@@ -23,7 +31,7 @@ def html_status(audit_status):
         return f'<a style="color: red; font-weight: bold;">{audit_status.strip("AUDIT_")}</a>'
     
 def format_diff(diff):
-    """Remove lines with ---, +++, @@ and style diff lines in red.
+    """Remove lines with ---, +++, @@ and style diff lines in yellow.
 
     Args:
         diff (list): A list containing the diff
@@ -40,7 +48,7 @@ def format_diff(diff):
                 break
         if not match:
             if line.startswith("-") or line.startswith("+"):
-                output.append(html_red(line))
+                output.append(html_yellow(line))
             else:
                 output.append(line)
     return output

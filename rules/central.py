@@ -3,10 +3,10 @@ from utils import html_yellow, html_status
 import logging
 import sys
 
-def eval_backup(fw_obj: SophosFirewall,
+def eval_central_mgmt(fw_obj: SophosFirewall,
                      fw_name: str,
                       settings: dict):
-    """Verify Scheduled Backup settings (System > Backup & firmware > Backup) 
+    """Verify Central Management (System > Sophos Central) 
 
     Args:
         fw_obj (SophosFirewall): SophosFirewall object
@@ -17,13 +17,13 @@ def eval_backup(fw_obj: SophosFirewall,
         dict: Audit results and output table(s)
     """
 
-    expected_settings = settings["scheduled_backup"]
+    expected_settings = settings["central_management"]
 
     for i in range(1,3):
         try:
-            result = fw_obj.get_backup()
+            result = fw_obj.get_tag("EnableCloudCentralManagement")
         except Exception as err:
-            logging.exception(f"Error while retrieving Backup settings for firewall {fw_name}: {err}")
+            logging.exception(f"Error while retrieving Central Management settings for firewall {fw_name}: {err}")
             if i < 3:
                 logging.info(f"Retry #{i}")
                 continue
@@ -32,32 +32,27 @@ def eval_backup(fw_obj: SophosFirewall,
                 sys.exit(1)
         break
 
-    actual_settings = result["Response"]["BackupRestore"]["ScheduleBackup"]
+    actual_settings = result["Response"]["EnableCloudCentralManagement"]
 
     result_dict = {
-        "backup": {
+        "central_management": {
             "expected": expected_settings,
             "actual": actual_settings,
             "status": "AUDIT_PASS"
         },
+        "audit_result": "PASS",
         "pass_ct": 0,
         "fail_ct": 0
     }
-    result_dict["audit_result"] = "PASS"
 
     expected_list = []
     actual_list = []
     for setting in expected_settings.keys():
-        if actual_settings[setting] == 'None':
-            actual_settings[setting] = None
         expected_list.append(f"{setting}: {expected_settings[setting]}")
-        
-        if not str(expected_settings[setting]).lower() == str(actual_settings[setting]).lower():
+        if not expected_settings[setting] == actual_settings[setting]:
             actual_list.append(f"{setting}: {html_yellow(actual_settings[setting])}")
-            result_dict["backup"]["status"] = "AUDIT_FAIL"
+            result_dict["central_management"]["status"] = "AUDIT_FAIL"
             result_dict["audit_result"] = "FAIL"
-            # print(f"expected_settings: {setting}: {expected_settings[setting]}")
-            # print(f"actual_settings: {setting}: {actual_settings[setting]}")
         else:
             actual_list.append(f"{setting}: {actual_settings[setting]}")
     if result_dict["audit_result"] == "PASS":
@@ -68,15 +63,15 @@ def eval_backup(fw_obj: SophosFirewall,
     output = []
 
     output.append([
-            "Scheduled Backup",
-            "System > Backup & firmware > Backup & restore",
-            "backup",
+            "Sophos Central Management",
+            "System > Sophos Central",
+            "central management",
              "\n".join(expected_list),
              "\n".join(actual_list),
-             html_status(result_dict["backup"]["status"])
+             html_status(result_dict["central_management"]["status"])
         ])
 
-    logging.info(f"{fw_name}: Scheduled Backup Result: {result_dict['audit_result']}")
+    logging.info(f"{fw_name}: Central Management Result: {result_dict['audit_result']}")
 
     result_dict["output"] = output
 

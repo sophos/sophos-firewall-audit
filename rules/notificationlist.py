@@ -1,5 +1,5 @@
 from sophosfirewall_python.firewallapi import SophosFirewall
-from utils import html_red, html_status
+from utils import html_yellow, html_status
 import logging
 import sys
 
@@ -50,7 +50,7 @@ def eval_notification_list(fw_obj: SophosFirewall,
     for setting in expected_settings.keys():
         expected_list.append(f"{setting}: {expected_settings[setting]}")
         if not expected_settings[setting] == actual_settings[setting]:
-            actual_list.append(f"{setting}: {html_red(actual_settings[setting])}")
+            actual_list.append(f"{setting}: {html_yellow(actual_settings[setting])}")
             result_dict["notification_list"]["status"] = "AUDIT_FAIL"
             result_dict["audit_result"] = "FAIL"
             # print(f"expected_settings: {setting}: {expected_settings[setting]}")
