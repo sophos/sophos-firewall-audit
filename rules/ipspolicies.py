@@ -1,5 +1,5 @@
 from sophosfirewall_python.firewallapi import SophosFirewall
-from utils import html_status, format_diff
+from utils import html_status, format_diff, html_yellow
 from difflib import unified_diff
 import logging
 import sys
@@ -19,6 +19,7 @@ def eval_ips_policies(fw_obj: SophosFirewall,
     """
 
     expected_policies = sorted(settings["policies"])
+    expected_status = settings["status"]
 
     for i in range(1,3):
         try:
@@ -35,10 +36,29 @@ def eval_ips_policies(fw_obj: SophosFirewall,
     
     actual_policies = sorted([policy["Name"] for policy in result["Response"]["IPSPolicy"]])
 
+    for i in range(1,3):
+        try:
+            result = fw_obj.get_tag("IPSSwitch")
+        except Exception as err:
+            logging.exception(f"Error while retrieving IPS status for firewall {fw_name}: {err}")
+            if i < 3:
+                logging.info(f"Retry #{i}")
+                continue
+            else:
+                logging.exception("Unrecoverable error, exiting!")
+                sys.exit(1)
+        break
+
+    actual_status = result["Response"]["IPSSwitch"]["Status"]
+
     result_dict = {
         "policies": {
             "expected": expected_policies,
             "actual": actual_policies
+        },
+        "ips_status": {
+            "expected": expected_status,
+            "actual": actual_status
         },
         "audit_result": "PASS",
         "pass_ct": 0,
@@ -51,8 +71,30 @@ def eval_ips_policies(fw_obj: SophosFirewall,
         result_dict["policies"]["status"] = "AUDIT_FAIL"
         result_dict["fail_ct"] += 1
         result_dict["audit_result"] = "FAIL"
+
+    if actual_status == expected_status:
+        result_dict["ips_status"]["status"] = "AUDIT_PASS"
+        result_dict["pass_ct"] += 1
+    else:
+        result_dict["ips_status"]["status"] = "AUDIT_FAIL"
+        result_dict["fail_ct"] += 1
+        result_dict["audit_result"] = "FAIL"
     
     output = []
+
+    if result_dict["ips_status"]["status"] == "AUDIT_FAIL":
+        actual_output = html_yellow(result_dict["ips_status"]["actual"])
+    else:
+        actual_output = result_dict["ips_status"]["actual"]
+
+    output.append([
+            "IPS Status",
+            "(Protect > Intrusion prevention > IPS policies",
+            "enabled/disabled",
+            result_dict["ips_status"]["expected"],
+            actual_output,
+            html_status(result_dict["ips_status"]["status"])
+        ])
 
     if result_dict["policies"]["status"] == "AUDIT_FAIL":
         diff = unified_diff(result_dict["policies"]["expected"], 

@@ -1,5 +1,5 @@
 from sophosfirewall_python.firewallapi import SophosFirewall
-from utils import html_status, html_red
+from utils import html_status, html_yellow
 import logging
 import sys
 
@@ -97,7 +97,7 @@ def eval_loginsecurity(fw_obj: SophosFirewall, fw_name: str, settings: dict):
                         "System > Administration > Admin and user settings",
                         "Login disclaimer settings",
                         f"{lvl1}: {result[lvl1]['expected']}",
-                        f"{lvl1}: {html_red(result[lvl1]['actual']) if status == 'AUDIT_FAIL' else result[lvl1]['actual']}",
+                        f"{lvl1}: {html_yellow(result[lvl1]['actual']) if status == 'AUDIT_FAIL' else result[lvl1]['actual']}",
                         html_status(status),
                     ]
                 )
@@ -116,7 +116,7 @@ def eval_loginsecurity(fw_obj: SophosFirewall, fw_name: str, settings: dict):
                             "System > Administration > Admin and user settings",
                             lvl1,
                             f"{lvl2}: {result[lvl1][lvl2]['expected']}",
-                            f"{lvl2}: {html_red(result[lvl1][lvl2]['actual']) if status == 'AUDIT_FAIL' else result[lvl1][lvl2]['actual']}",
+                            f"{lvl2}: {html_yellow(result[lvl1][lvl2]['actual']) if status == 'AUDIT_FAIL' else result[lvl1][lvl2]['actual']}",
                             html_status(status),
                         ]
                     )
@@ -138,7 +138,7 @@ def eval_loginsecurity(fw_obj: SophosFirewall, fw_name: str, settings: dict):
                                 "System > Administration > Admin and user settings",
                                 f"{lvl1}\n{lvl2}",
                                 f"{lvl3}: {result[lvl1][lvl2][lvl3]['expected']}",
-                                f"{lvl3}: {html_red(result[lvl1][lvl2][lvl3]['actual']) if status == 'AUDIT_FAIL' else result[lvl1][lvl2][lvl3]['actual']}",
+                                f"{lvl3}: {html_yellow(result[lvl1][lvl2][lvl3]['actual']) if status == 'AUDIT_FAIL' else result[lvl1][lvl2][lvl3]['actual']}",
                                 html_status(status),
                             ]
                         )
