@@ -50,8 +50,8 @@ def eval_certificate(fw_obj: SophosFirewall,
     for setting in expected_settings.keys():
         expected_list.append(f"{setting}: {expected_settings[setting]}")
         
-        if not expected_settings[setting] == actual_settings[setting]:
-            actual_list.append(f"{setting}: {html_yellow(actual_settings[setting])}")
+        if not expected_settings[setting] == actual_settings.get(setting):
+            actual_list.append(f"{setting}: {html_yellow(actual_settings.get(setting))}")
             result_dict["certificate"]["status"] = "AUDIT_FAIL"
             result_dict["audit_result"] = "FAIL"
             # print(f"expected_settings: {setting}: {expected_settings[setting]}")

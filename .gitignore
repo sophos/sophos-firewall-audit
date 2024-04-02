@@ -6,4 +6,5 @@ audit-results*
 results.json
 *.crt
 *.key
+audit_settings.yaml
 __pycache__/
