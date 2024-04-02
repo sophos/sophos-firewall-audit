@@ -62,7 +62,7 @@ def eval_hostgroups(fw_obj: SophosFirewall,
             result_dict["audit_result"] = "FAIL"
 
         if result_dict["hostgroups"]["status"] == "AUDIT_FAIL":
-            diff = unified_diff(result_dict["hostgroups"]["expected"], result_dict["hostgroups"]["actual"], n=100000000)
+            diff = unified_diff(sorted(result_dict["hostgroups"]["expected"]), sorted(result_dict["hostgroups"]["actual"]), n=100000000)
             actual_output = "\n".join(format_diff(diff))
         else:
             actual_output = "\n".join(result_dict["hostgroups"]["actual"])

@@ -1,11 +1,17 @@
 """Sophos Firewall Audit
 
-Environment Variables (Required):
+Environment Variables
+
+If using HashiCorp Vault:
 VAULT_MOUNT_POINT = HashiCorp Vault Mount Point (ex. kv)
 VAULT_SECRET_PATH = HashiCorp Vault Secret path
-VAULT_USERNAME = HashiCorp Vault username
+VAULT_SECRET_KEY = HashiCore Vault Secret Key
 ROLEID = HashiCorp Vault Role ID
 SECRETID = HashiCorp Vault Secret ID
+
+If not using HashiCorp Vault:
+FW_USERNAME = Firewall username
+FW_PASSWORD = Firewall password
 
 Optional, for use with Nautobot as inventory:
 NAUTOBOT_URL = Nautobot URL
@@ -27,7 +33,7 @@ from datetime import datetime
 import json
 import argparse
 import yaml
-from jinja2 import Environment, PackageLoader, select_autoescape
+from jinja2 import Environment, PackageLoader, Template, select_autoescape
 from rich.logging import RichHandler
 from rich.highlighter import RegexHighlighter
 from rich.theme import Theme
@@ -153,6 +159,12 @@ def all_devices_query(environ):
     templ = environ.get_template("all_devices_query.j2")
     return templ.render()
 
+def create_dir(dirpath):
+    try:
+        os.mkdir(dirpath)
+    except FileExistsError:
+        logging.info("Skipping creation of %s because it already exists", dirpath)
+    return
 
 if __name__ == '__main__':
 
@@ -170,6 +182,8 @@ if __name__ == '__main__':
     group2.add_argument("-r", "--region_list", help="Comma separated list of Nautobot Regions for selection of devices")
     group2.add_argument("-d", "--device_list", help="Comma separated list of Nautobot Devices")
     group2.add_argument("-a", "--all_devices", help="All Sophos firewalls in Nautobot", action="store_true")
+    parser.add_argument("-f", "--file", help="Audit settings YAML file", default="audit_settings.yaml")
+    parser.add_argument("-v", "--use_vault", help="Use HashiCorp Vault to retrieve credentials", action="store_true", default=False)
 
     args = parser.parse_args()
     logging.info("Starting Sophos Firewall audit")
@@ -193,27 +207,35 @@ if __name__ == '__main__':
             firewalls = yaml.safe_load(fn)
 
 
+    if args.use_vault:
+        logging.info ("Retrieving credentials from Vault...")
+        fw_password = get_credential(
+            mount_point=os.environ['VAULT_MOUNT_POINT'],
+            secret_path=os.environ['VAULT_SECRET_PATH'],
+            key = os.environ['VAULT_SECRET_KEY']
+        )
+        logging.info("Successfully retrieved credentials!")
     
-    logging.info ("Retrieving credentials from Vault...")
-    fw_password = get_credential(
-        mount_point=os.environ['VAULT_MOUNT_POINT'],
-        secret_path=os.environ['VAULT_SECRET_PATH'],
-        key = os.environ['VAULT_USERNAME']
-    )
-    logging.info("Successfully retrieved credentials!")
-
-    with open("audit_settings.yaml", "r") as fn:
-        audit_settings = yaml.safe_load(fn)
+    else:
+        fw_username = os.environ.get("FW_USERNAME")
+        fw_password = os.environ.get("FW_PASSWORD")
+        
   
     status_dict = {}
 
+
+    create_dir("results_html")
+    create_dir("docker/results_html")
+
     dt = datetime.now()
-    dirname = f"audit-results-{dt.strftime('%Y-%m-%d-%H%M%S')}"
-    os.mkdir(dirname)
+    local_dirname = os.path.join("results_html", f"audit-results-{dt.strftime('%Y-%m-%d-%H%M%S')}")
+    web_dirname = os.path.join("docker", "results_html", f"audit-results-{dt.strftime('%Y-%m-%d-%H%M%S')}")
+    os.mkdir(local_dirname)
+    os.mkdir(web_dirname)
 
     for firewall in firewalls:
         fw = SophosFirewall(
-            username=os.environ['VAULT_USERNAME'],
+            username=os.environ['VAULT_SECRET_KEY'] if args.use_vault else fw_username,
             password=fw_password,
             hostname=firewall['hostname'],
             port=firewall['port'],
@@ -225,6 +247,11 @@ if __name__ == '__main__':
         except Exception as Error:
             logging.error(f"Error connecting to firewall {firewall['hostname']}: {Error}")
             continue
+
+        with open(args.file, "r") as fn:
+            templ = Template(source=fn.read())
+            rendered = templ.render({"firewall_hostname": fw.hostname.split(".")[0]})
+            audit_settings = yaml.safe_load(rendered)
 
         results = []
         output = []
@@ -242,96 +269,96 @@ if __name__ == '__main__':
                 "settings": audit_settings["access_acl"],
                 "log_msg": "Evaluate Access ACL"
             },
-            {
-                "method": rules.eval_central_mgmt, 
-                "settings": audit_settings,
-                "log_msg": "Evaluate Central Management"
-            },
-            {
-                "method": rules.eval_device_access_profile,
-                "settings": audit_settings["device_access_profile"],
-                "log_msg": "Evaluate Device Access Profiles"
-            },
-            {
-                "method": rules.eval_admin_services,
-                "settings": audit_settings["admin_services"],
-                "log_msg": "Evaluate WAN Zone Admin Services"
-            },
-            {
-                "method": rules.eval_admin_authen,
-                "settings": audit_settings["authen_servers"],
-                "log_msg": "Evaluate Authentication Servers"
-            },
-            {
-                "method": rules.eval_malware_protection,
-                "settings": audit_settings["malware_protection"],
-                "log_msg": "Evaluate Malware Protection Antivirus Engine"
-            },
-            {
-                "method": rules.eval_atp,
-                "settings": audit_settings["threat_protection"],
-                "log_msg": "Evaluate Advanced Threat Protection (ATP)"
-            },
-            {
-                "method": rules.eval_ips_policies,
-                "settings": audit_settings["ips_policies"],
-                "log_msg": "Evaluate IPS Policies"
-            },
-            {
-                "method": rules.eval_hostgroups,
-                "settings": audit_settings["host_groups"],
-                "log_msg": "Evaluate Host Groups"
-            },
-            {
-                "method": rules.eval_syslog,
-                "settings": audit_settings["syslog"],
-                "log_msg": "Evaluate Syslog Settings"
-            },
-            {
-                "method": rules.eval_notifications,
-                "settings": audit_settings,
-                "log_msg": "Evaluate Notifications Settings"
-            },
-            {
-                "method": rules.eval_notification_list,
-                "settings": audit_settings,
-                "log_msg": "Evaluate Notification List Settings"
-            },
-            {
-                "method": rules.eval_backup,
-                "settings": audit_settings,
-                "log_msg": "Evaluate Scheduled Backup Settings"
-            },
-            {
-                "method": rules.eval_certificate,
-                "settings": audit_settings,
-                "log_msg": "Evaluate Certificate Settings"
-            },
-            {
-                "method": rules.eval_loginsecurity,
-                "settings": audit_settings,
-                "log_msg": "Evaluate Login Security"
-            },
-            {
-                "method": rules.eval_dns_servers,
-                "settings": audit_settings,
-                "log_msg": "Evaluate DNS Servers"
-            },
-            {
-                "method": rules.eval_smtp_protection,
-                "settings": audit_settings,
-                "log_msg": "Evaluate SMTP Protection"
-            },
-            {
-                "method": rules.eval_snmpv3,
-                "settings": audit_settings,
-                "log_msg": "Evaluate SNMPv3"
-            },
-            {
-                "method": rules.eval_time,
-                "settings": audit_settings['time'],
-                "log_msg": "Evaluate Time Settings"
-            }
+            # {
+            #     "method": rules.eval_central_mgmt, 
+            #     "settings": audit_settings,
+            #     "log_msg": "Evaluate Central Management"
+            # },
+            # {
+            #     "method": rules.eval_device_access_profile,
+            #     "settings": audit_settings["device_access_profile"],
+            #     "log_msg": "Evaluate Device Access Profiles"
+            # },
+            # {
+            #     "method": rules.eval_admin_services,
+            #     "settings": audit_settings["admin_services"],
+            #     "log_msg": "Evaluate WAN Zone Admin Services"
+            # },
+            # {
+            #     "method": rules.eval_admin_authen,
+            #     "settings": audit_settings["authen_servers"],
+            #     "log_msg": "Evaluate Authentication Servers"
+            # },
+            # {
+            #     "method": rules.eval_malware_protection,
+            #     "settings": audit_settings["malware_protection"],
+            #     "log_msg": "Evaluate Malware Protection Antivirus Engine"
+            # },
+            # {
+            #     "method": rules.eval_atp,
+            #     "settings": audit_settings["threat_protection"],
+            #     "log_msg": "Evaluate Advanced Threat Protection (ATP)"
+            # },
+            # {
+            #     "method": rules.eval_ips_policies,
+            #     "settings": audit_settings["ips_policies"],
+            #     "log_msg": "Evaluate IPS Policies"
+            # },
+            # {
+            #     "method": rules.eval_hostgroups,
+            #     "settings": audit_settings["host_groups"],
+            #     "log_msg": "Evaluate Host Groups"
+            # },
+            # {
+            #     "method": rules.eval_syslog,
+            #     "settings": audit_settings["syslog"],
+            #     "log_msg": "Evaluate Syslog Settings"
+            # },
+            # {
+            #     "method": rules.eval_notifications,
+            #     "settings": audit_settings,
+            #     "log_msg": "Evaluate Notifications Settings"
+            # },
+            # {
+            #     "method": rules.eval_notification_list,
+            #     "settings": audit_settings,
+            #     "log_msg": "Evaluate Notification List Settings"
+            # },
+            # {
+            #     "method": rules.eval_backup,
+            #     "settings": audit_settings,
+            #     "log_msg": "Evaluate Scheduled Backup Settings"
+            # },
+            # {
+            #     "method": rules.eval_certificate,
+            #     "settings": audit_settings,
+            #     "log_msg": "Evaluate Certificate Settings"
+            # },
+            # {
+            #     "method": rules.eval_loginsecurity,
+            #     "settings": audit_settings,
+            #     "log_msg": "Evaluate Login Security"
+            # },
+            # {
+            #     "method": rules.eval_dns_servers,
+            #     "settings": audit_settings,
+            #     "log_msg": "Evaluate DNS Servers"
+            # },
+            # {
+            #     "method": rules.eval_smtp_protection,
+            #     "settings": audit_settings,
+            #     "log_msg": "Evaluate SMTP Protection"
+            # },
+            # {
+            #     "method": rules.eval_snmpv3,
+            #     "settings": audit_settings,
+            #     "log_msg": "Evaluate SNMPv3"
+            # },
+            # {
+            #     "method": rules.eval_time,
+            #     "settings": audit_settings['time'],
+            #     "log_msg": "Evaluate Time Settings"
+            # }
         ]
         for rule in rule_list:
             result = process_rule(rule["method"], rule["settings"], rule["log_msg"], fw, status_dict)
@@ -350,25 +377,67 @@ if __name__ == '__main__':
         template = env.get_template("results.j2")
         result_html = template.render(firewall_name=firewall_name, table=table.get_html_string(format=True, escape_data=False))
 
-        with open (f"{dirname}/{firewall_name}.html", "w", encoding="utf-8") as fn:
-            fn.write(result_html)
+        for dirname in [local_dirname, web_dirname]:
+            with open (f"{dirname}/{firewall_name}.html", "w", encoding="utf-8") as fn:
+                fn.write(result_html)
 
-        with open(f"{dirname}/{firewall['hostname']}.json", "w", encoding="utf-8") as fn:
-            fn.write(json.dumps(results, indent=4))
+            with open(f"{dirname}/{firewall['hostname']}.json", "w", encoding="utf-8") as fn:
+                fn.write(json.dumps(results, indent=4))
 
     template = env.get_template("index.j2")
 
     firewall_list = [firewall['hostname'] for firewall in firewalls]
-    index_html = template.render(status_dict=status_dict)
-
-    with open(f"{dirname}/index.html", "w", encoding="utf-8") as fn:
-        fn.write(index_html)
 
     with open("results.json", "w", encoding="utf-8") as fn:
         fn.write(json.dumps(status_dict))
 
+    for dirname in [local_dirname, web_dirname]:
+        index_html = template.render(status_dict=status_dict, dirname=dirname)
 
+        with open(f"{dirname}/index.html", "w", encoding="utf-8") as fn:
+            fn.write(index_html)
 
-    
+        if "docker" in dirname:
+            try:
+                with open(os.path.join("docker", "results_html", "index.html"), "r", encoding="utf-8") as fn:
+                    home_html = fn.readlines()
+            except FileNotFoundError:
+                with open(os.path.join("templates", "home_index.j2"), "r") as fn:
+                    home_html = fn.readlines()
+                with open(os.path.join("docker", "results_html", "index.html"), "w", encoding="utf-8") as fn:
+                    fn.writelines(home_html)
+        else:
+            try:
+                with open(os.path.join("results_html", "index.html"), "r", encoding="utf-8") as fn:
+                    home_html = fn.readlines()
+            except FileNotFoundError:
+                with open(os.path.join("templates", "home_index.j2"), "r") as fn:
+                    home_html = fn.readlines()
+                with open(os.path.join("results_html", "index.html"), "w", encoding="utf-8") as fn:
+                    fn.writelines(home_html)                  
 
+        updated_home_html = []
+
+        for line in home_html:
+            if "<h1>Firewall Audit</h1>" in line:
+                updated_home_html.append(line)
+                if "docker" in dirname:
+                    updated_home_html.append(
+                        f'<a style="text-align: left;" href="/{dirname.split("/")[2]}/index.html">{dirname.split("/")[2]}</a><br/>\n'
+                    )
+                    
+                else:
+                   updated_home_html.append(
+                        f'<a style="text-align: left;" href="file:{dirname.split("/")[1]}/index.html">{dirname.split("/")[1]}</a><br/>\n'
+                    )
+                    
+            else:
+                updated_home_html.append(line)
+
+        if "docker" in dirname:
+            with open(os.path.join("docker", "results_html", "index.html"), "w", encoding="utf-8") as fn:
+                fn.writelines(updated_home_html)
+        else:
+            with open(os.path.join("results_html", "index.html"), "w", encoding="utf-8") as fn:
+                fn.writelines(updated_home_html)
         

@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Values.namespace }}
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+  labels:
+    app: fwaudit
+spec:
+  type: {{ .Values.fwaudit.service.type }}
+  ports:
+    - port: {{ .Values.fwaudit.service.port }}
+      targetPort: {{ .Values.fwaudit.service.targetPort }}
+  selector:
+    app: fwaudit

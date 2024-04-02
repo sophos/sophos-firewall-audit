@@ -66,7 +66,7 @@ def eval_snmpv3(fw_obj: SophosFirewall,
             result_dict["fail_ct"] += 1
 
         if key == "AuthorizedHosts" and not actual[key] == "None" and status == "AUDIT_FAIL":
-            actual_output = '\n'.join(format_diff(unified_diff(expected[key], actual[key], n=1000000000)))
+            actual_output = '\n'.join(format_diff(unified_diff(sorted(expected[key]), sorted(actual[key]), n=1000000000)))
         elif key == "AuthorizedHosts" and not actual[key] == "None" and status == "AUDIT_PASS":
             actual_output = '\n'.join(actual[key])
         else:

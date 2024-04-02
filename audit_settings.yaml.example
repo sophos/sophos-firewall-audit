@@ -3,14 +3,15 @@
 # Local service ACL exception rule (System > Administration > Device Access > Local service ACL exception)
 access_acl:
   hostgroups:
-    - Sophos Internal ACL
-    - Sophos External ACL
-    - All EAA Hosts
+    - Internal ACL
+    - External ACL
   services:
-    - "38"
-    - "9"
+    - Ping
     - HTTPS
     - SSH
+    - UserPortal
+    - VPNPortal
+
 # Central Management (System > Sophos Central)
 central_management:
   FWBackup: BackupEnable
@@ -64,85 +65,9 @@ host_groups:
   groups:
     - name: Isolated Subnets
       hosts:
-        - DOR 172.16.75.0/24 Visitor_SSID
-        - BEI 10.162.236.0/24 SOPHOS SSID
-        - WIE 10.48.202.0/24
-        - ABN 210.224.236.0 /23 Sophos-SSID
-        - DAL 10.120.235.0/24
-        - BAN 10.194.196.0/24 Test Network-5
-        - SE Demo2
-        - SOM 10.103.114.0/24
-        - redutm-homeuser-genemeltser SOPHOS SSID 10.252.0.208/29
-        - MIL 10.83.237.0/24 SOPHOS SSID
-        - BOS 10.104.200.0/24 Tech Support
-        - NYC 10.96.236.0/22 SOPHOS
-        - HKG 10.174.236.0/24 SOPHOS_SSID
-        - MAN 10.172.239.0/24 SOPHOS SSID
-        - AHM 10.200.236.0/22 SOPHOS_SSID
-        - WIE 10.48.237.0/24 SophosSSID
-        - WIE 10.60.237.0/24 SOPHOS SSID
-        - BEZ 10.94.208.0/21 Sales Engineering
-        - OTT 10.118.236.0/22 SOPHOS
-        - SLC 10.98.236.0/22 SOPHOS
-        - VAN 10.108.235.0 ESG SSID
-        - SOM 10.103.113.0/26 NetGenie
-        - Airtame 10.224.240.0/24
-        - ABN 10.224.114.0/24 ENG Copernicus testing
-        - FAX 10.120.236.0/24 SOPHOS SSID
-        - ABN 10.226.236.0 /24 FLAT1 SOPHOS SSID
-        - BEZ 10.94.200.0 /21 Technical Support
-        - BOS 10.104.208.0/23 Sales Support
-        - BOS 10.104.236.0/23
-        - WIE 10.48.41.0/24 Post_machine
-        - BAN 10.194.193.0/24 Test Network-2
-        - BOS 10.104.255.0/24 Pink Network
-        - VAN 172.16.99.0/24 Legacy Brown
-        - BUD 10.69.157.0/30 P2P for Pink
-        - MAN UK 10.184.236.0-22 SOPHOS_SSID
-        - VAN 10.108.208.0/21 Sales Engineering
-        - MIL 10.83.200.0 /21 Technical Support
-        - redutm-homeuser-danschiappa SOPHOS SSID 10.252.0.80/29
-        - MAD 10.70.236.0/23
-        - ABN 10.224.113.0/26 ENGWEB
-        - WIE 10.48.203.0/24
-        - BAN 10.195.236.0/24 SOPHOS SSID
-        - OOS 10.90.208.0/21 Sales Engineering
-        - DOR 10.75.236.0 /23 SOPHOS SSID
-        - BAN 10.194.192.0/24 Test Network-1
-        - VAN 10.108.200.0/21 Technical Support
-        - HEN 10.91.236.0/24 SOPHOS SSID
-        - DIE 10.51.41.0/24 Postage_machine
-        - DIE 10.51.237.0/24 SOPHOS SSID
-        - ROM 10.84.237.0/24 SOPHOS SSID
-        - BUD 10.69.236.0/23 SOPHOS SSID
-        - SMA 10.107.236.0/24 SOPHOS SSID San Mateo
-        - BEZ 10.94.41.0/24 Postage_machine
-        - REDUTM-HomeUser-Beta-1 Sophos SSID 10.252.0.16/29
-        - KIS 10.92.237.0/24 SOPHOS SSID
-        - ABN 10.224.200.0/24 Legacy Green Servers
-        - BUD 10.69.146.0/24 Pink
-        - redutm-homeuser-danteal SOPHOS SSID 10.252.1.16/29
-        - OOS 10.90.200.0 /21 Technical Support
-        - MIL 10.83.208.0/21 Sales Engineering
-        - ABN 10.224.94.0/26 ITS Seciurity 1
-        - BAN 10.194.236.0/24 SOPHOS SSID
-        - BEZ 10.90.237.0/24 SOPHOS SSID
-        - SE Demo
-        - BAN 10.194.195.0/24 Test Network-4
-        - OOS 10.90.237.0/24 Sophos SSID
-        - HKG 10.174.208.0/24 Sales_Eng
-        - VAN 10.108.236.0/23 SOPHOS SSID
-        - DBI 10.86.236.0/24 Sophos SSID Dubai
-        - MUC 10.95.236.0/23 SOPHOS SSID
-        - ABN 10.224.208.0/23
-        - AHM 10.201.236.0/22 SOPHOS_SSID
-        - ABN 10.227.236.0 /24 FLAT2 SOPHOS SSID
-        - WIE 10.48.200.0/24 TechSup1
-        - TYO 10.87.239.0/24 SOPHOS SSID
-        - redutm-homeuser-mattsetzer SOPHOS SSID 10.252.0.144/29
-        - BAN 10.194.194.0/24 Test Network-3
-        - MAN UK 10.182.236.0-22 SOPHOS_SSID
-        - redutm-homeuser-richardteal SOPHOS SSID 10.252.1.80/29
+        - NYC 172.16.4.0/24 Example_1
+        - SFO 172.16.10.0/24 Example_2
+
 # Syslog settings (Configure > System services > Log settings)
 syslog:  
   - name: Local_Server
@@ -269,13 +194,13 @@ syslog:
         ZeroDayProtectionEvents: Enable
 # Notification settings (System > Administration > Notification settings)
 notifications:
-  SenderAddress: do-not-reply@fw-notify.net
-  AuthenticationRequired: Disable
-  Port: "25"
-  ConnectionSecurity: None
-  MailServer: mx.green.sophos
-  Recepient: networkalerts@Sophos.com
-  Username: 
+  SenderAddress: "{{ firewall_hostname }}@example.com"
+  AuthenticationRequired: Enable
+  Port: "587"
+  ConnectionSecurity: STARTTLS
+  MailServer: mail.aol.com
+  Recepient: alerts@xample.com
+  Username: smtpuser
   ManagementInterface: 
 # Notification List settings (Configure > System services > Notification list)
 notification_list:
@@ -366,11 +291,11 @@ scheduled_backup:
   FtpPath:
   Username:
   FTPServer:
-  EmailAddress: networkalerts@sophos.com
+  EmailAddress: alerts@example.com
   BackupFrequency: Weekly
   Date:
   Day: Sunday
-  Hour: "22"
+  Hour: "23"
   Minute: "00"
 
 # Reports retention (Monitory & Analyze > Reports > Report Settings > Data management)
@@ -381,7 +306,8 @@ certificate:
   WebAdminSettings:
     Certificate: Webadmin-CA
     HTTPSport: "4444"
-    UserPortalHTTPSPort: "443"
+    UserPortalHTTPSPort: "4443"
+    VPNPortalHTTPSPort: "443"
     PortalRedirectMode: ip
     PortalCustomHostname: 
 
@@ -404,9 +330,8 @@ login_security:
 
 # DNS Servers (Configure > Network > DNS)
 dns_servers:
-  - 10.104.65.2
-  - 10.104.64.2
-  - 168.95.1.1
+  - 4.2.2.1
+  - 4.2.2.2
 
 # SNMPv3 (System > Administration > SNMP)
 snmpv3:
@@ -414,12 +339,8 @@ snmpv3:
   AcceptQueries: Enable
   SendTraps: Enable
   AuthorizedHosts: 
-    - 10.104.67.14
-    - 10.104.79.31
-    - 10.200.67.12
-    - 10.200.79.40
-    - 10.224.67.40
-    - 10.224.69.5
+    - 10.1.100.101
+    - 10.1.100.102
 
 # Time Settings (System > Administration > Time)
 time:

@@ -1,0 +1,5 @@
+# Chart.yaml
+apiVersion: v2
+name: fwaudit-chart
+description: A Helm chart for deploying NGINX container hosting a static website with Sophos Firewall Audit results
+version: 0.1.0

@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: fwaudit
+spec:
+  replicas: {{ .Values.fwaudit.replicaCount }}
+  selector:
+    matchLabels:
+      app: fwaudit
+  template:
+    metadata:
+      labels:
+        app: fwaudit
+    spec:
+      containers:
+        - name: fwaudit
+          image: {{ .Values.fwaudit.image.repository }}:{{ .Values.fwaudit.image.tag }}
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8443
+      #     volumeMounts:
+      #       - name: html
+      #         mountPath: /usr/share/nginx/html
+      # volumes:
+      #   - name: html
+      #     emptyDir: {}

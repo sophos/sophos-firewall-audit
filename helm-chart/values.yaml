@@ -1,0 +1,16 @@
+# values.yaml
+fwaudit:
+  image:
+    repository: 503708563173.dkr.ecr.eu-west-1.amazonaws.com/fwaudit-results
+    tag: 1
+  replicaCount: 1
+  service:
+    type: LoadBalancer
+    port: 443
+    targetPort: 8443
+  ingress:
+    enabled: true # Changed to true to use Ingress
+namespace: fwaudit
+    # hosts:
+    #   - host: example.com
+    #     paths: ["/"]

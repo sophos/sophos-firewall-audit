@@ -1,6 +1,9 @@
 *.whl
 *.zip
 wip.txt
+results_html/
 audit-results*
 results.json
+*.crt
+*.key
 __pycache__/

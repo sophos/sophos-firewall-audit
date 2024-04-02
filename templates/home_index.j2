@@ -35,33 +35,8 @@ th, td {
 }
 </style>
 <div>
-    <h1>Firewall Audit Report</h1>
-    <table frame="box" rules="all">
-        <tbody>
-            <tr>
-              <th style="text-align: left;">Firewall</th>
-              <th style="text-align: center;">Passed</th>
-              <th style="text-align: center;">Failed</th>
-            </tr>
-            {% for firewall in status_dict.keys() %}
-            <tr>
-                {% if 'docker' in dirname %}
-                {% set dir_paths = dirname.split('/') %}
-                {% set audit_dir = dir_paths[2] %}
-                <td style="text-align: left;"><a href="/{{ audit_dir }}/{{ firewall }}.html">{{ firewall }}</a></td>
-                {% else %}
-                <td style="text-align: left;"><a href="file:{{ firewall }}.html">{{ firewall }}</a></td>
-                {% endif %}
-                <td style="text-align: center;">{{ status_dict[firewall].success_ct }}</td>
-                <td style="text-align: center;">{{ status_dict[firewall].failed_ct }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    
+  <h1>Firewall Audit</h1>
 </div>
 
 </head>
-
 </html>
