@@ -1,6 +1,7 @@
-from sophosfirewall_python.firewallapi import SophosFirewall
+from sophosfirewall_python.firewallapi import SophosFirewall, SophosFirewallZeroRecords
 from utils import html_status, format_diff
 from difflib import unified_diff
+from requests.exceptions import RequestException
 import logging
 import sys
 
@@ -30,7 +31,7 @@ def eval_hostgroups(fw_obj: SophosFirewall,
         for i in range(1,3):
             try:
                 result = fw_obj.get_ip_hostgroup(name=host_group["name"])
-            except Exception as err:
+            except RequestException as err:
                 logging.exception(f"Error while retrieving IP host group {host_group['name']} for firewall {fw_name}: {err}")
                 if i < 3:
                     logging.info(f"Retry #{i}")
@@ -38,34 +39,47 @@ def eval_hostgroups(fw_obj: SophosFirewall,
                 else:
                     logging.exception("Unrecoverable error, exiting!")
                     sys.exit(1)
-            break
+            except SophosFirewallZeroRecords as err:
+                result = None
+                break
+            
+        if result:
+            if "HostList" in result["Response"]["IPHostGroup"]:
+                actual_hosts = sorted([host for host in result["Response"]["IPHostGroup"]["HostList"]["Host"]])
+            else:
+                actual_hosts = ["Not Found"]
 
-        if "HostList" in result["Response"]["IPHostGroup"]:
-            actual_hosts = sorted([host for host in result["Response"]["IPHostGroup"]["HostList"]["Host"]])
-        else:
-            actual_hosts = ["Not Found"]
+            result_dict["hostgroups"] =  {
+                    "expected": expected_hosts,
+                    "actual": actual_hosts,
+                    "hostgroup_name": host_group["name"]
+                }
+            
+            if actual_hosts == expected_hosts:
+                result_dict["hostgroups"]["status"] = "AUDIT_PASS"
+                result_dict["pass_ct"] += 1
+            else:
+                result_dict["hostgroups"]["status"] = "AUDIT_FAIL"
+                result_dict["fail_ct"] += 1
+            
+            if result_dict["hostgroups"]["status"] == "AUDIT_FAIL":
+                result_dict["audit_result"] = "FAIL"
 
-        result_dict["hostgroups"] =  {
-                "expected": expected_hosts,
-                "actual": actual_hosts,
-                "hostgroup_name": host_group["name"]
-            }
-        
-        if actual_hosts == expected_hosts:
-            result_dict["hostgroups"]["status"] = "AUDIT_PASS"
-            result_dict["pass_ct"] += 1
+            if result_dict["hostgroups"]["status"] == "AUDIT_FAIL":
+                diff = unified_diff(sorted(result_dict["hostgroups"]["expected"]), sorted(result_dict["hostgroups"]["actual"]), n=100000000)
+                actual_output = "\n".join(format_diff(diff))
+            else:
+                actual_output = "\n".join(result_dict["hostgroups"]["actual"])
         else:
+            result_dict["hostgroups"] =  {
+                    "expected": expected_hosts,
+                    "actual": "Host group not found!",
+                    "hostgroup_name": host_group["name"]
+                }
             result_dict["hostgroups"]["status"] = "AUDIT_FAIL"
             result_dict["fail_ct"] += 1
-        
-        if result_dict["hostgroups"]["status"] == "AUDIT_FAIL":
             result_dict["audit_result"] = "FAIL"
-
-        if result_dict["hostgroups"]["status"] == "AUDIT_FAIL":
-            diff = unified_diff(sorted(result_dict["hostgroups"]["expected"]), sorted(result_dict["hostgroups"]["actual"]), n=100000000)
-            actual_output = "\n".join(format_diff(diff))
-        else:
-            actual_output = "\n".join(result_dict["hostgroups"]["actual"])
+            actual_output = "Hostgroup not found!"
 
         output.append([
                 "IP Host Group",
@@ -75,7 +89,6 @@ def eval_hostgroups(fw_obj: SophosFirewall,
                 actual_output,
                 html_status(result_dict["hostgroups"]["status"])
             ])
-        
 
     logging.info(f"{fw_name}: Host Groups Result: {result_dict['audit_result']}")
 
