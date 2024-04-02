@@ -36,8 +36,8 @@ def eval_atp(fw_obj: SophosFirewall,
         break
     
     actual = result["Response"]["ATP"]
-    actual_state = result["Response"]["ATP"]["ThreatProtectionStatus"]
-    actual_policy = result["Response"]["ATP"]["Policy"]
+    actual_state = result["Response"]["ATP"].get("ThreatProtectionStatus")
+    actual_policy = result["Response"]["ATP"].get("Policy")
 
     result_dict = {
         "atp": {
