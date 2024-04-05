@@ -73,13 +73,13 @@ def eval_hostgroups(fw_obj: SophosFirewall,
         else:
             result_dict["hostgroups"] =  {
                     "expected": expected_hosts,
-                    "actual": "Host group not found!",
+                    "actual": f"Host group {host_group['name']} not found!",
                     "hostgroup_name": host_group["name"]
                 }
             result_dict["hostgroups"]["status"] = "AUDIT_FAIL"
             result_dict["fail_ct"] += 1
             result_dict["audit_result"] = "FAIL"
-            actual_output = "Hostgroup not found!"
+            actual_output = f"Hostgroup {host_group['name']} not found!"
 
         output.append([
                 "IP Host Group",

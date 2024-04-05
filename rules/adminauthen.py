@@ -31,9 +31,12 @@ def eval_admin_authen(fw_obj: SophosFirewall,
                 logging.exception("Unrecoverable error, exiting!")
                 sys.exit(1)
         break
-
-    servers = sorted([server for server in result["Response"]["AdminAuthentication"]['AuthenticationServerList']['AuthenticationServer']
-                      if not server == "Local"])
+    
+    auth_servers = result["Response"]["AdminAuthentication"]['AuthenticationServerList']['AuthenticationServer']
+    if isinstance(auth_servers, list):
+        servers = sorted([server for server in auth_servers if not server == "Local"])
+    if isinstance(auth_servers, str):
+        servers = [auth_servers]
 
     result_dict = {
         "servers": {

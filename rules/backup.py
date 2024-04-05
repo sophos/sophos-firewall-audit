@@ -1,4 +1,5 @@
-from sophosfirewall_python.firewallapi import SophosFirewall
+from sophosfirewall_python.firewallapi import SophosFirewall, SophosFirewallZeroRecords
+from requests import RequestException
 from utils import html_yellow, html_status
 import logging
 import sys
@@ -22,7 +23,7 @@ def eval_backup(fw_obj: SophosFirewall,
     for i in range(1,3):
         try:
             result = fw_obj.get_backup()
-        except Exception as err:
+        except RequestException as err:
             logging.exception(f"Error while retrieving Backup settings for firewall {fw_name}: {err}")
             if i < 3:
                 logging.info(f"Retry #{i}")
@@ -30,9 +31,15 @@ def eval_backup(fw_obj: SophosFirewall,
             else:
                 logging.exception("Unrecoverable error, exiting!")
                 sys.exit(1)
+        except SophosFirewallZeroRecords:
+            result = None
+            break
         break
-
-    actual_settings = result["Response"]["BackupRestore"]["ScheduleBackup"]
+    
+    if result:
+        actual_settings = result["Response"]["BackupRestore"]["ScheduleBackup"]
+    else:
+        actual_settings = {}
 
     result_dict = {
         "backup": {
@@ -48,18 +55,16 @@ def eval_backup(fw_obj: SophosFirewall,
     expected_list = []
     actual_list = []
     for setting in expected_settings.keys():
-        if actual_settings[setting] == 'None':
+        if actual_settings.get(setting) == 'None':
             actual_settings[setting] = None
         expected_list.append(f"{setting}: {expected_settings[setting]}")
         
-        if not str(expected_settings[setting]).lower() == str(actual_settings[setting]).lower():
-            actual_list.append(f"{setting}: {html_yellow(actual_settings[setting])}")
+        if  str(expected_settings[setting]).lower() != str(actual_settings.get(setting)).lower():
+            actual_list.append(f"{setting}: {html_yellow(actual_settings.get(setting))}")
             result_dict["backup"]["status"] = "AUDIT_FAIL"
             result_dict["audit_result"] = "FAIL"
-            # print(f"expected_settings: {setting}: {expected_settings[setting]}")
-            # print(f"actual_settings: {setting}: {actual_settings[setting]}")
         else:
-            actual_list.append(f"{setting}: {actual_settings[setting]}")
+            actual_list.append(f"{setting}: {actual_settings.get(setting)}")
     if result_dict["audit_result"] == "PASS":
         result_dict["pass_ct"] += 1
     else:

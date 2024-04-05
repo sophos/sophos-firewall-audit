@@ -1,6 +1,7 @@
-from sophosfirewall_python.firewallapi import SophosFirewall
+from sophosfirewall_python.firewallapi import SophosFirewall, SophosFirewallZeroRecords
 from utils import html_status, format_diff
 from difflib import unified_diff
+from requests.exceptions import RequestException
 import logging
 import sys
 
@@ -24,7 +25,7 @@ def eval_access_list(fw_obj: SophosFirewall,
     for i in range(1,4):
         try:
             acl_result = fw_obj.get_acl_rule()
-        except Exception as err:
+        except RequestException as err:
             logging.exception(f"Error while retrieving access list for firewall {fw_name}: {err}")
             if i < 3:
                 logging.info(f"Retry #{i}")
@@ -32,29 +33,36 @@ def eval_access_list(fw_obj: SophosFirewall,
             elif i == 3:
                 logging.exception("Unrecoverable error, exiting!")
                 sys.exit(1)
+        except SophosFirewallZeroRecords:
+            acl_result = None
+            break
         break
+    
+    if acl_result:
+        if isinstance(acl_result["Response"]["LocalServiceACL"], dict):
+            hostgroups = sorted(list(set(acl_result["Response"]["LocalServiceACL"]["Hosts"]["Host"])))
+            services = sorted(list(set(acl_result["Response"]["LocalServiceACL"]["Services"]["Service"])))
 
-    if isinstance(acl_result["Response"]["LocalServiceACL"], dict):
-        hostgroups = sorted(list(set(acl_result["Response"]["LocalServiceACL"]["Hosts"]["Host"])))
-        services = sorted(list(set(acl_result["Response"]["LocalServiceACL"]["Services"]["Service"])))
-
-    if isinstance(acl_result["Response"]["LocalServiceACL"], list):
+        if isinstance(acl_result["Response"]["LocalServiceACL"], list):
+            hostgroups = []
+            services = []
+            for acl in acl_result["Response"]["LocalServiceACL"]:
+                if "Hosts" in acl:
+                    if isinstance(acl["Hosts"]["Host"], list):
+                        for host in acl["Hosts"]["Host"]:
+                            hostgroups.append(host)
+                    else:
+                        hostgroups.append(acl["Hosts"]["Host"])
+                if isinstance(acl["Services"]["Service"], list):
+                    for service in acl["Services"]["Service"]:
+                        services.append(service)
+                else:
+                    services.append(acl["Services"]["Service"])
+                hostgroups = sorted(list(set(hostgroups)))
+                services = sorted(list(set(services)))
+    else:
         hostgroups = []
         services = []
-        for acl in acl_result["Response"]["LocalServiceACL"]:
-            if "Hosts" in acl:
-                if isinstance(acl["Hosts"]["Host"], list):
-                    for host in acl["Hosts"]["Host"]:
-                        hostgroups.append(host)
-                else:
-                    hostgroups.append(acl["Hosts"]["Host"])
-            if isinstance(acl["Services"]["Service"], list):
-                for service in acl["Services"]["Service"]:
-                    services.append(service)
-            else:
-                services.append(acl["Services"]["Service"])
-            hostgroups = sorted(list(set(hostgroups)))
-            services = sorted(list(set(services)))
 
     result_dict = {
         "acl_hostgroups": {
