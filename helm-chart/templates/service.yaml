@@ -5,6 +5,7 @@ metadata:
   namespace: {{ .Values.namespace }}
   annotations:
     service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+    service.beta.kubernetes.io/aws-load-balancer-subnets: subnet-06384e2efc05b3037,subnet-00789cad45b627e72
   labels:
     app: fwaudit
 spec:
