@@ -8,6 +8,7 @@ fwaudit:
     type: LoadBalancer
     port: 443
     targetPort: 8443
+    subnets: subnet-06384e2efc05b3037,subnet-00789cad45b627e72
   ingress:
     enabled: true # Changed to true to use Ingress
 namespace: fwaudit
