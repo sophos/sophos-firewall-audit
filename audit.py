@@ -121,31 +121,18 @@ def device_query(environ, devices):
     templ = environ.get_template("device_query.j2")
     return templ.render(device_list=devices)
 
-def site_query(environ, sites):
+def location_query(environ, locations):
     """Generate GraphQL query
 
     Args:
         environ (Environment): Jinja2 Environment
-        sites (list): List of sites
+        locations (list): List of locations
 
     Returns:
         str: GraphQL query
     """
-    templ = environ.get_template("site_query.j2")
-    return templ.render(site_list=sites)
-
-def region_query(environ, regions):
-    """Generate GraphQL query
-
-    Args:
-        environ (Environment): Jinja2 Environment
-        regions (list): List of regions
-
-    Returns:
-        str: GraphQL query
-    """
-    templ = environ.get_template("region_query.j2")
-    return templ.render(region_list=regions)
+    templ = environ.get_template("location_query.j2")
+    return templ.render(location_list=locations)
 
 def all_devices_query(environ):
     """Generate GraphQL query
@@ -178,8 +165,7 @@ if __name__ == '__main__':
     group2 = parser.add_mutually_exclusive_group()
     group1.add_argument("-n", "--use_nautobot", help="Use Nautobot for inventory", action="store_true")
     group1.add_argument("-i", "--inventory_file", help="Inventory filename")
-    group2.add_argument("-s", "--site_list", help="Comma separated list of Nautobot Sites for selection of devices")
-    group2.add_argument("-r", "--region_list", help="Comma separated list of Nautobot Regions for selection of devices")
+    group2.add_argument("-s", "--location_list", help="Comma separated list of Nautobot Locations for selection of devices")
     group2.add_argument("-d", "--device_list", help="Comma separated list of Nautobot Devices")
     group2.add_argument("-a", "--all_devices", help="All Sophos firewalls in Nautobot", action="store_true")
     parser.add_argument("-f", "--file", help="Audit settings YAML file", default="audit_settings.yaml")
@@ -192,12 +178,9 @@ if __name__ == '__main__':
         if args.device_list:
             device_list = [line.strip() for line in args.device_list.split(",")]
             nb_query = device_query(env, device_list)
-        if args.site_list:
-            site_list = [line.strip() for line in args.site_list.split(",")]
-            nb_query = site_query(env, site_list)
-        if args.region_list:
-            region_list = [line.strip() for line in args.region_list.split(",")]
-            nb_query = region_query(env, region_list)
+        if args.location_list:
+            location_list = [line.strip() for line in args.location_list.split(",")]
+            nb_query = location_query(env, location_list)
         if args.all_devices:
             nb_query = all_devices_query(env)
         firewalls = nb_graphql_query(nb_query)
