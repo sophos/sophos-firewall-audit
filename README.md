@@ -54,18 +54,15 @@ Finally, specify the `--use-nautobot` argument when running the program.
 ## Usage
 ```bash
 python audit.py --help
-usage: audit.py [-h] (-n | -i INVENTORY_FILE) [-s SITE_LIST | -r REGION_LIST | -d DEVICE_LIST | -a]
-                [-f FILE] [-v]
+usage: audit.py [-h] (-n | -i INVENTORY_FILE) [-s LOCATION_LIST | -d DEVICE_LIST | -a] [-f FILE] [-v]
 
 options:
   -h, --help            show this help message and exit
   -n, --use_nautobot    Use Nautobot for inventory
   -i INVENTORY_FILE, --inventory_file INVENTORY_FILE
                         Inventory filename
-  -s SITE_LIST, --site_list SITE_LIST
-                        Comma separated list of Nautobot Sites for selection of devices
-  -r REGION_LIST, --region_list REGION_LIST
-                        Comma separated list of Nautobot Regions for selection of devices
+  -s LOCATION_LIST, --location_list LOCATION_LIST
+                        Comma separated list of Nautobot Locations for selection of devices
   -d DEVICE_LIST, --device_list DEVICE_LIST
                         Comma separated list of Nautobot Devices
   -a, --all_devices     All Sophos firewalls in Nautobot
@@ -74,7 +71,7 @@ options:
 ```
 Example:
 ```bash
-python audit.py --inventory_file firewalls.yaml --use_vault
+python audit.py --inventory_file firewalls.yaml --use_vault -f audit_settings.yaml
 ```
 
 ## Viewing Results
