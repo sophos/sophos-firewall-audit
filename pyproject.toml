@@ -14,9 +14,15 @@ jinja2 = "^3.1.2"
 requests = "^2.31.0"
 prettytable = "^3.9.0"
 rich = "^13.5.3"
-pynautobot = "^1.5.0"
+pynautobot = "^2.0.0"
+packaging = "^23.2"
+sophosfirewall-python = "^0.1.36"
 
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+sophosfirewallaudit = "sophos_firewall_audit.sophosfirewallaudit:main"
+

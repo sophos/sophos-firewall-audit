@@ -1,2 +1,2 @@
-# - hostname: example-host.network.sophos.com
-#   port: 4444
+- hostname: us-bos-utm-stage-1.network.green.sophos
+  port: 4444

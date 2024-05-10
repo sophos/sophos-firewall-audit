@@ -1,10 +1,13 @@
 *.whl
 *.zip
 wip.txt
-results_html/
 audit-results*
+/results_html*
 results.json
 *.crt
 *.key
 audit_settings.yaml
 __pycache__/
+dist/
+sophos_firewall_audit/results_html*
+firewalls.yaml

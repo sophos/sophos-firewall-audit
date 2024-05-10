@@ -1,11 +1,21 @@
 # Firewall Audit
 Perform an audit of one or more Sophos firewalls for compliance with a baseline security settings. The audit compares a defined set of expected settings (the baseline) with the actual running configuration of each firewall, and produces an HTML report indicating audit Pass/Fail status. 
 
+## Installation
+The firewall audit can be installed using the Python `pip` installer. At this time the project has not yet been published on the Python Package Index (PyPi), therefore you must first download the `.whl` file from the releases page of this repository.  Python 3.11 is the minimum version required on your system prior to installation. We recommend installing into a Python virtual environment so as not to interfere with any other Python packages installed on your system.
+
+```bash
+python -m venv firewallaudit
+source ./firewallaudit/bin/activate
+pip install sophos_firewall_audit-x.x.x-py3-none-any.whl
+```
+Once installed, the command `sophosfirewallaudit --help` should display the help menu for the program. 
+
 ## Setup
-The expected settings must first be defined in the `audit_settings.yaml` file. The file `audit_settings.yaml.example` is provided to help with defining the expected settings. It should be modified to match the expected firewall configuration in the target environment. The example file can be named `audit_settings.yaml`, which will be used by the audit by default. Alternatively, it is possible to have settings files for different firewall configurations.  In that case, you would specify the `-f` or `--file` option to specify the settings filename when running the audit. 
+The expected settings must first be defined in the `audit_settings.yaml` file. The file `audit_settings.yaml.example` is provided to help with defining the expected settings. It should be modified to match the expected firewall configuration in the target environment. The example file can be named `audit_settings.yaml`, which will be used by the audit by default. Alternatively, it is possible to have settings files for different firewall configurations.  In that case, you would specify the `-s` or `--settings_file` option to specify the settings filename when running the audit. 
 
 ### Firewall Credentials
-The program can use a single username and password stored as environment variables:
+The program can use username and password credentials stored as environment variables:
 
 ```bash
 FW_USERNAME = Firewall username
@@ -32,56 +42,55 @@ The audit will be performed on the devices listed in the file `firewalls.yaml`. 
   port: 4444
 ```
   
-If Nautobot (https://github.com/nautobot/) is in use for storing of inventory, the audit program can access it to retrieve the firewall inventory instead of using the `firewalls.yaml` file. 
+[Nautobot](https://github.com/nautobot/) can alternatively be used instead of an inventory file. The audit program can access the Nautobot API to retrieve the firewall inventory instead of using the `firewalls.yaml` file. 
 
 If using Nautobot as inventory the following environment variables are required:
 ```bash
 NAUTOBOT_URL = Nautobot URL
 NAUTOBOT_TOKEN = Nautobot API Token
 ```
-In addition, you must configure the query to retrieve the inventory.  The query is written in the GraphQL language, for which there is a helpful query tool in the Nautobot UI that can assist with building the queries. There are three files that should be modified to suit your environment:
+In addition, you must configure the query to retrieve the inventory.  The query is written in the GraphQL language, for which there is a helpful query tool in the Nautobot UI that can assist with building the queries. There are three example query files in the `nautobot_query` directory of this repository that can be modified to suit your environment:
   
-`templates/all_devices_query.j2`: This is the query that is executed if the `--all_devices` argument is specified. The current query returns all firewalls that have a status in Nautobot of Active and that do not have a tag of `Auxillary`.  The `Auxillary` tag is used to tag devices in Nautobot that are the standby device in an HA pair, as they should not be audited. 
-  
-`templates/site_query.j2`: Query executed when specifying the `--site_list` argument. It returns the firewalls that are in the specified Site(s) in Nautobot, that have a status of Active, and do not have a tag of `Auxillary`. 
+`nautobot_query/all_devices_query.j2`:  This example query returns all firewalls that have a status in Nautobot of Active, have a tag of `SFOS`, and that do not have a tag of `Auxillary`.  The `SFOS` tag is used to select only devices in Nautobot running Sophos Firewall OS. The `Auxillary` tag is used to identify devices in Nautobot that are the standby device in an HA pair. 
 
-`templates/region_query.j2`: Query executed when specifying the `--region_list` argument. It returns the firewalls that are in the specified Region(s), that have a status of Active, and do not have a tag of `Auxillary`.
+`nautobot_query/device_query.j2`: This example query can be used to provide a specific list of devices in Nautobot. 
 
-> To use the existing queries as-is, you would need to create the Auxillary tag in Nautobot and assign it to one of the members of each HA pair
+`nautobot_query/location_query.j2`:  This example query returns the firewalls that are in the specified Location(s) in Nautobot, that have a status of Active, a tag of `SFOS`, and do not have a tag of `Auxillary`. 
 
-Finally, specify the `--use-nautobot` argument when running the program. 
+> To use the existing queries as-is, you would need to create the Auxillary tag in Nautobot and assign it to one of the members of each HA pair. Also, the `SFOS` tag would need to be created in Nautobot and assigned to devices running Sophos Firewall OS.
+
+The query file should be specified using the `-q` or `--query_file` option along with the `-n` or `--use_nautobot` flag on the command line.  
 
 ## Usage
 ```bash
-python audit.py --help
-usage: audit.py [-h] (-n | -i INVENTORY_FILE) [-s LOCATION_LIST | -d DEVICE_LIST | -a] [-f FILE] [-v]
+sophosfirewallaudit --help
+usage: sophosfirewallaudit [-h] (-i INVENTORY_FILE | -n) [-q QUERY_FILE] [-d] [-s SETTINGS_FILE] [-u]
 
 options:
   -h, --help            show this help message and exit
-  -n, --use_nautobot    Use Nautobot for inventory
   -i INVENTORY_FILE, --inventory_file INVENTORY_FILE
                         Inventory filename
-  -s LOCATION_LIST, --location_list LOCATION_LIST
-                        Comma separated list of Nautobot Locations for selection of devices
-  -d DEVICE_LIST, --device_list DEVICE_LIST
-                        Comma separated list of Nautobot Devices
-  -a, --all_devices     All Sophos firewalls in Nautobot
-  -f FILE, --file FILE  Audit settings YAML file
-  -v, --use_vault       Use HashiCorp Vault to retrieve credentials
+  -n, --use_nautobot    Use Nautobot for inventory
+  -q QUERY_FILE, --query_file QUERY_FILE
+                        File containing Nautobot GraphQL query
+  -d, --disable_verify  Disable certificate checking for Nautobot
+  -s SETTINGS_FILE, --settings_file SETTINGS_FILE
+                        Audit settings YAML file
+  -u, --use_vault       Use HashiCorp Vault to retrieve credentials
 ```
 Example:
 ```bash
-python audit.py --inventory_file firewalls.yaml --use_vault -f audit_settings.yaml
+sophosfirewallaudit --inventory_file firewalls.yaml --settings_file audit_settings.yaml
 ```
 
 ## Viewing Results
-Upon completion of each audit run, html files containing the results are generated. There are three options for local viewing and/or publishing the results. 
+Upon completion of each audit run, html files containing the results are generated. The directory `results_html_local` is for viewing the results in the browser by opening them as files (no web server required), and the directory `results_html_web` contains html files that can be published on a web server.
   
-### Option 1: View Results Locally
-Upon completion of each audit run, the results are stored in the `results_html` directory. In this directory, the `index.html` contains hyperlinks to browse the results as files in a web browser. Simply open the `index.html` file in a web browser. Each time the audit is run, the `index.html` file is updated with a new hyperlink for the new results. 
+### Viewing Results Locally
+Upon completion of each audit run, the results are stored in the `results_html_local` directory. In this directory, the `index.html` contains hyperlinks to browse the results as files in a web browser. Simply open the `index.html` file in a web browser. Each time the audit is run, the `index.html` file is updated with a new hyperlink for the new results. 
 
-### Option 2: Share using a Docker container
-Results are also stored in the directory `docker/results_html`, but in this case the hyperlinks are configured for use with a web server. A Docker container can be built that runs a lightweight web proxy (NGINX) to serve the files over HTTPS. Follow the below steps to build and run the container:
+### Publish using a Docker container
+Results are also stored in the directory `results_html_web`, but in this case the hyperlinks are configured for use with a web server. A Docker container can be built that runs a lightweight web proxy (NGINX) to serve the files over HTTPS. Follow the below steps to build and run the container:
 
 1. Create an SSL private key and certificate to be used with the container. You may use the commands here to create a self-signed certificate, however, we recommend obtaining a certificate from a trusted Certificate Authority.
 
@@ -96,23 +105,25 @@ openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
 2. Build the container
 
 ```bash
+cd docker
 docker build . -t firewall-audit --platform=linux/amd64
 ```
 
-3. Run the container
+3. Run the container.  The below command must be run from the directory where the `results_html_web` was created. 
 ```bash
-docker run --rm -d -p 8443:8443 -v $(pwd)/results_html:/usr/share/nginx/html firewall-audit
+docker run --rm -d -p 8443:8443 -v $(pwd)/results_html_web:/usr/share/nginx/html firewall-audit
 ```
-> Make sure to be in the `docker` directory when running this, otherwise the wrong results_html folder will get mounted into the container and the links will not work.
 
 The container should now be available on the local host using `https://localhost:8443`. It should also be accessible from other hosts on the network using `https://<hostname_or_ip>:8443`. 
 
-> The reason for using port 8443 instead of 443 here is because some systems require elevated privileges to open ports < 1024
+> The reason for using port 8443 instead of 443 here is because some systems require elevated privileges to open ports < 1024. 
 
 ### Deploy to Kubernetes
-The container can also be deployed on a Kubernetes cluster. To accomplish this, the container must be built using Docker and pushed to a container registry that is accessible to the cluster. The `values.yaml` file must be updated with the parameters for your deployment, and then the container can be created in Kubernetes using the included Helm chart. The below example uses Amazon ECR (Elastic Compute Registry) to store the container image in a registry named `fwaudit-results`. 
+The container can also be deployed on a Kubernetes cluster using the included Helm chart. To accomplish this, the container must be built using Docker and pushed to a container registry that is accessible to the cluster. The `values.yaml` file must be updated with the parameters for your deployment, and then the container can be created in Kubernetes using the included Helm chart. The below example uses Amazon ECR (Elastic Compute Registry) to store the container image in a registry named `fwaudit-results`. 
 
-1. Build the container
+1. Copy the `results_html_web` folder to `docker/results_html_web`. It is fine to overwrite the existing `docker/results_html_web` folder, as it is only a placeholder. 
+
+2. Build the container
 ```bash
 cd docker
 docker build . -t firewall-audit --platform=linux/amd64
@@ -156,4 +167,4 @@ fwaudit   LoadBalancer   172.20.15.15   internal-a9570544864734ace8277f0f0a2777e
 
 The web browser will be running at `https://<EXTERNAL-IP>`. 
 
-> Using this option, the `results_html` directory is copied into the container with the current contents. It will not automatically pick up the latest results when running a new audit. To accomplish that, the container must be re-built each time a new audit is run and pushed to the container registry. The container can then be updated in Kubernetes using `helm upgrade . -f values.yaml`.  Consider using [Sophos Factory](https://www.sophos.com/en-us/products/sophos-factory) to create an automated pipeline to run the audit periodically and update the container.  
+> Using this option, the `results_html_web` directory is copied into the container with the current contents. It will not automatically pick up the latest results when running a new audit. To accomplish that, the container must be re-built each time a new audit is run and pushed to the container registry. The container can then be updated in Kubernetes using `helm upgrade . -f values.yaml`.   

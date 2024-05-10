@@ -1,0 +1,5 @@
+query {
+  devices(name: ["us-bos-utm-stage-1"]) {
+    name
+  }
+}

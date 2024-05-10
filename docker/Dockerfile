@@ -2,7 +2,7 @@
 FROM nginx:latest
 
 # Copy local html files to the container
-COPY results_html /usr/share/nginx/html
+COPY results_html_web /usr/share/nginx/html
 
 # Copy SSL certificate and key to the container
 COPY server.key /etc/nginx/ssl/server.key

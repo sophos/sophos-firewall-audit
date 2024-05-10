@@ -12,6 +12,3 @@ fwaudit:
   ingress:
     enabled: true # Changed to true to use Ingress
 namespace: fwaudit
-    # hosts:
-    #   - host: example.com
-    #     paths: ["/"]

@@ -1,0 +1,2 @@
+- hostname: example-host.network.sophos.com
+  port: 4444

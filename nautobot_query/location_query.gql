@@ -1,0 +1,5 @@
+query {
+  devices(location: ["Abingdon", "Vancouver"], manufacturer:"Sophos", tags: "SFOS", tags__n:"Auxillary", status:"Active") {
+    name
+  }
+}
