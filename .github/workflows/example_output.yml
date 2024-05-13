@@ -34,11 +34,11 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Create tar file
-        run: tar -cvf "${RUNNER_TEMP}/artifact.tar" "sample_output/results_html_web"
+        run: tar -cvf ${{ runner.temp }}/artifact.tar sample_output/results_html_web
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          path: "${RUNNER_TEMP}/artifact.tar"
+          path: ${{ runner.temp }}/artifact.tar
           retention-days: 1
           if-no-files-found: error
       - name: Deploy to GitHub Pages
