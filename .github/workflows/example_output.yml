@@ -33,13 +33,10 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v5
-      - name: Create tar file
-        run: tar -cvf website.tar -C sample_output/results_html_web .
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          name: website
-          path: website.tar
+          path: sample_output/results_html_web
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
