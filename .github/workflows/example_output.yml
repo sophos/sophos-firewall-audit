@@ -36,7 +36,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: sample_output/results_html_web/*
+          path: sample_output/
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
