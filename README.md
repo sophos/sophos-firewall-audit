@@ -2,7 +2,7 @@
 Perform an audit of one or more Sophos firewalls for compliance with a baseline security settings. The audit compares a defined set of expected settings (the baseline) with the actual running configuration of each firewall, and produces an HTML report indicating audit Pass/Fail status. 
 
 ## Installation
-The firewall audit can be installed using the Python `pip` installer. At this time the project has not yet been published on the Python Package Index (PyPi), therefore you must first download the `.whl` file from the releases page of this repository.  Python 3.11 is the minimum version required on your system prior to installation. We recommend installing into a Python virtual environment so as not to interfere with any other Python packages installed on your system.
+The firewall audit can be installed using the Python `pip` installer. At this time the project has not yet been published on the Python Package Index (PyPi), therefore you must first download the `.whl` file from the releases page of this repository.  Python 3.9 is the minimum version required on your system prior to installation. We recommend installing into a Python virtual environment so as not to interfere with any other Python packages installed on your system.
 
 ```bash
 python -m venv firewallaudit
@@ -12,7 +12,7 @@ pip install sophos_firewall_audit-x.x.x-py3-none-any.whl
 Once installed, the command `sophosfirewallaudit --help` should display the help menu for the program. 
 
 ## Setup
-The expected settings must first be defined in the `audit_settings.yaml` file. The file `audit_settings.yaml.example` is provided to help with defining the expected settings. It should be modified to match the expected firewall configuration in the target environment. The example file can be named `audit_settings.yaml`, which will be used by the audit by default. Alternatively, it is possible to have settings files for different firewall configurations.  In that case, you would specify the `-s` or `--settings_file` option to specify the settings filename when running the audit. 
+The expected settings must first be defined in the `audit_settings.yaml` file. The file `audit_settings.yaml.example` is provided to help with defining the expected settings. It should be modified to match the expected firewall configuration in the target environment. The filename `audit_settings.yaml` will be used by the audit by default. It is also possible to have separate settings files for different firewall configurations.  In that case, you would specify the `-s` or `--settings_file` option to specify the settings filename when running the audit. 
 
 ### Firewall Credentials
 The program can use username and password credentials stored as environment variables:
@@ -42,7 +42,7 @@ The audit will be performed on the devices listed in the file `firewalls.yaml`. 
   port: 4444
 ```
   
-[Nautobot](https://github.com/nautobot/) can alternatively be used instead of an inventory file. The audit program can access the Nautobot API to retrieve the firewall inventory instead of using the `firewalls.yaml` file. 
+It is also possible to use [Nautobot](https://github.com/nautobot/) rather than an inventory file. The audit program can access the Nautobot API to retrieve the firewall inventory instead of using the `firewalls.yaml` file. The program will use a GraphQL query to retrieve the inventory from Nautobot. The GraphQL query can be customized as needed to meet your inventory requirements.
 
 If using Nautobot as inventory the following environment variables are required:
 ```bash
@@ -57,7 +57,7 @@ In addition, you must configure the query to retrieve the inventory.  The query 
 
 `nautobot_query/location_query.j2`:  This example query returns the firewalls that are in the specified Location(s) in Nautobot, that have a status of Active, a tag of `SFOS`, and do not have a tag of `Auxillary`. 
 
-> To use the existing queries as-is, you would need to create the Auxillary tag in Nautobot and assign it to one of the members of each HA pair. Also, the `SFOS` tag would need to be created in Nautobot and assigned to devices running Sophos Firewall OS.
+> To use the existing queries as-is, you would need to create the Auxillary tag in Nautobot and assign it to one of the members of each HA pair. Also, the `SFOS` tag would need to be created in Nautobot and assigned to devices running Sophos Firewall OS. Since we do not want to target Auxillary devices, we use the `tag__n` notation which tells GraphQL to return devices that do not have the tag Auxillary.  
 
 The query file should be specified using the `-q` or `--query_file` option along with the `-n` or `--use_nautobot` flag on the command line.  
 
@@ -84,7 +84,7 @@ sophosfirewallaudit --inventory_file firewalls.yaml --settings_file audit_settin
 ```
 
 ## Viewing Results
-Upon completion of each audit run, html files containing the results are generated. The directory `results_html_local` is for viewing the results in the browser by opening them as files (no web server required), and the directory `results_html_web` contains html files that can be published on a web server.
+Upon completion of each audit run, html files containing the results are generated. The directory `results_html_local` can be used to view the results in the browser by opening them as files (no web server required). The directory `results_html_web` contains html files with the links formatted such that the content can be published on a web server.
   
 ### Viewing Results Locally
 Upon completion of each audit run, the results are stored in the `results_html_local` directory. In this directory, the `index.html` contains hyperlinks to browse the results as files in a web browser. Simply open the `index.html` file in a web browser. Each time the audit is run, the `index.html` file is updated with a new hyperlink for the new results. 
