@@ -37,7 +37,9 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           # Upload sample output
-          path: './sample_output/results_html_web'
+          path: |
+            ./sample_output/results_html_web/index.html
+            ./sample_ouput/results_html_web/audit-results-2024-05-13-091336/
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
