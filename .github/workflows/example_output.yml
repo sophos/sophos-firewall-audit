@@ -34,7 +34,7 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Create tar file
-        run: tar -cvf ${{ runner.temp }}/artifact.tar -C sample_output results_html_web .
+        run: tar -cvf ${{ runner.temp }}/artifact.tar -C sample_output/results_html_web .
       - name: Display Tar Archive
         run: tar -tvf ${{ runner.temp }}/artifact.tar
       - name: Upload artifact
