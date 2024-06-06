@@ -4,12 +4,12 @@ Perform an audit of one or more Sophos firewalls for compliance with a baseline 
 [Example Report Output](https://scaling-engine-221jlw2.pages.github.io)
 
 ## Installation
-The firewall audit can be installed using the Python `pip` installer. At this time the project has not yet been published on the Python Package Index (PyPi), therefore you must first download the `.whl` file from the releases page of this repository.  Python 3.9 is the minimum version required on your system prior to installation. We recommend installing into a Python virtual environment so as not to interfere with any other Python packages installed on your system.
+The firewall audit can be installed using the Python `pip` installer. Python 3.9 is the minimum version required on your system prior to installation. We recommend installing into a Python virtual environment so as not to interfere with any other Python packages installed on your system.
 
 ```bash
 python -m venv firewallaudit
 source ./firewallaudit/bin/activate
-pip install sophos_firewall_audit-x.x.x-py3-none-any.whl
+pip install sophos-firewall-audit
 ```
 Once installed, the command `sophosfirewallaudit --help` should display the help menu for the program. 
 
