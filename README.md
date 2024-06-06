@@ -8,7 +8,11 @@ The firewall audit can be installed using the Python `pip` installer. Python 3.9
 
 ```bash
 python -m venv firewallaudit
+# Activate virtual environment on Linux
 source ./firewallaudit/bin/activate
+# Activate virtual environment on Windows
+firewallaudit\Scripts\activate.bat
+
 pip install sophos-firewall-audit
 ```
 Once installed, the command `sophosfirewallaudit --help` should display the help menu for the program. 
@@ -22,8 +26,13 @@ The expected settings must first be defined in the `audit_settings.yaml` file. T
 The program can use username and password credentials stored as environment variables:
 
 ```bash
-FW_USERNAME = Firewall username
-FW_PASSWORD = Firewall password
+# Linux
+export FW_USERNAME=<Your firewall username>
+export FW_PASSWORD=<Your firewall password>
+
+# Windows
+set FW_USERNAME=<Your firewall username>
+set FW_PASSWORD=<Your firewall password>
 ```
 Alternatively, it can pull the credentials from Hashicorp Vault. To do so, the following environment variables must be defined:
 
