@@ -13,6 +13,8 @@ pip install sophos-firewall-audit
 ```
 Once installed, the command `sophosfirewallaudit --help` should display the help menu for the program. 
 
+> Windows users may see an error message `ModuleNotFoundError: No module named 'pkg_resources' ` when running the `sophosfirewallaudit` command.  To correct this, run `pip install setuptools`.  
+
 ## Setup
 The expected settings must first be defined in the `audit_settings.yaml` file. The file `audit_settings.yaml.example` is provided to help with defining the expected settings. It should be modified to match the expected firewall configuration in the target environment. The filename `audit_settings.yaml` will be used by the audit by default. It is also possible to have separate settings files for different firewall configurations.  In that case, you would specify the `-s` or `--settings_file` option to specify the settings filename when running the audit. 
 
