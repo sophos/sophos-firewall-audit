@@ -38,8 +38,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # - name: Publish to PyPI
-      #   uses: pypa/gh-action-pypi-publish@release/v1
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
       # below is for PyPi test
         # with:
         #   repository-url: https://test.pypi.org/legacy/
