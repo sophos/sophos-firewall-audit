@@ -360,10 +360,10 @@ def main():
         result_html = template.render(firewall_name=firewall_name, table=table.get_html_string(format=True, escape_data=False))
 
         for dirname in [local_dirname, web_dirname]:
-            with open (f"{dirname}/{firewall_name}.html", "w", encoding="utf-8") as fn:
+            with open (f"{os.path.join(dirname, firewall_name)}.html", "w", encoding="utf-8") as fn:
                 fn.write(result_html)
 
-            with open(f"{dirname}/{firewall['hostname']}.json", "w", encoding="utf-8") as fn:
+            with open(f"{os.path.join(dirname, firewall['hostname'])}.json", "w", encoding="utf-8") as fn:
                 fn.write(json.dumps(results, indent=4))
 
     template = env.get_template("index.j2")
@@ -376,7 +376,7 @@ def main():
     for dirname in [local_dirname, web_dirname]:
         index_html = template.render(status_dict=status_dict, dirname=dirname)
 
-        with open(f"{dirname}/index.html", "w", encoding="utf-8") as fn:
+        with open(os.path.join(dirname, 'index.html'), "w", encoding="utf-8") as fn:
             fn.write(index_html)
 
         template_file = pkg_resources.resource_filename("sophos_firewall_audit", os.path.join("templates", "home_index.j2"))
@@ -407,12 +407,12 @@ def main():
                 updated_home_html.append(line)
                 if "web" in dirname:
                     updated_home_html.append(
-                        f'<a style="text-align: left;" href="/{dirname.split("/")[1]}/index.html">{dirname.split("/")[1]}</a><br/>\n'
+                        f'<a style="text-align: left;" href="/{dirname.split(os.sep)[1]}/index.html">{dirname.split(os.sep)[1]}</a><br/>\n'
                     )
                     
                 else:
                     updated_home_html.append(
-                        f'<a style="text-align: left;" href="file:{dirname.split("/")[1]}/index.html">{dirname.split("/")[1]}</a><br/>\n'
+                        f'<a style="text-align: left;" href="file:{dirname.split(os.sep)[1]}/index.html">{dirname.split(os.sep)[1]}</a><br/>\n'
                     )
             else:
                 updated_home_html.append(line)
