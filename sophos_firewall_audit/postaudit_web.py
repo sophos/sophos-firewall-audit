@@ -99,8 +99,10 @@ def parse_results(results):
         
 
 if __name__ == "__main__":
-
-    with open("results.json", "r") as fn:
+    
+    current_directory = os.path.dirname(os.path.abspath(__file__))
+    parent_directory = os.path.dirname(current_directory)
+    with open(os.path.join(parent_directory, "results.json"), "r") as fn:
         results = json.loads(fn.read())
 
     html_table = parse_results(results)
