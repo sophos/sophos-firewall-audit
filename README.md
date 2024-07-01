@@ -1,7 +1,7 @@
 # Firewall Audit
 Perform an audit of one or more Sophos firewalls for compliance with a baseline security settings. The audit compares a defined set of expected settings (the baseline) with the actual running configuration of each firewall, and produces an HTML report indicating audit Pass/Fail status. 
 
-[Example Report Output](https://scaling-engine-221jlw2.pages.github.io)
+[Example Report Output](https://sophos.github.io/sophos-firewall-audit/)
 
 ## Installation
 The firewall audit can be installed using the Python `pip` installer. Python 3.9 is the minimum version required on your system prior to installation. We recommend installing into a Python virtual environment so as not to interfere with any other Python packages installed on your system.
