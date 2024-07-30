@@ -90,14 +90,19 @@ options:
   -s SETTINGS_FILE, --settings_file SETTINGS_FILE
                         Audit settings YAML file
   -u, --use_vault       Use HashiCorp Vault to retrieve credentials
+  -r, --rule_export     Export rules for offline viewing
 ```
 Example:
 ```bash
 sophosfirewallaudit --inventory_file firewalls.yaml --settings_file audit_settings.yaml
 ```
 
+> The `--rule_export` command provides the ability to export the firewall rules so that they can be viewed offline using a web browser. If this flag is provided, the audit will be skipped and instead the rule export will be executed.
+
 ## Viewing Results
 Upon completion of each audit run, html files containing the results are generated. The directory `results_html_local` can be used to view the results in the browser by opening them as files (no web server required). The directory `results_html_web` contains html files with the links formatted such that the content can be published on a web server.
+
+> If using the `--rules_export` flag, the results will be written to `rule_export_local` and `rule_export_web`. 
   
 ### Viewing Results Locally
 Upon completion of each audit run, the results are stored in the `results_html_local` directory. In this directory, the `index.html` contains hyperlinks to browse the results as files in a web browser. Simply open the `index.html` file in a web browser. Each time the audit is run, the `index.html` file is updated with a new hyperlink for the new results. 
