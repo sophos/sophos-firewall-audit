@@ -35,8 +35,29 @@ th, td {
 }
 </style>
 <div>
-  <h1>Firewall Audit</h1>
+    <h1>{{ title }}</h1>
+    <table frame="box" rules="all">
+        <tbody>
+            <tr>
+              <th style="text-align: left;">Firewall</th>
+            </tr>
+            {% for firewall in firewall_list %}
+            <tr>
+                {% if 'web' in dirname %}
+                {% set dir_paths = dirname.split('/') %}
+                {% set audit_dir = dir_paths[1] %}
+                <td style="text-align: left;"><a href="/{{ rule_export_dir }}/{{ firewall }}.html">{{ firewall }}</a></td>
+                {% else %}
+                <td style="text-align: left;"><a href="file:{{ firewall }}.html">{{ firewall }}</a></td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    
 </div>
 
 </head>
+
 </html>

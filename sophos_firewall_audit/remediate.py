@@ -147,7 +147,7 @@ if __name__ == "__main__":
         )
         logging.info(f"Remediation beginning for firewall: {hostname}")
 
-        with open(results_file, "r") as fn:
+        with open(results_file, "r", encoding="utf-8") as fn:
             results = json.loads(fn.read())
 
         failed_list = []

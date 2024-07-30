@@ -137,7 +137,7 @@ if __name__ == "__main__":
     logging.info(f"Uploading file {filename} to S3 bucket {S3_BUCKET}")
     s3_url = upload_to_s3(S3_BUCKET, filename)
 
-    with open("results.json", "r") as fn:
+    with open("results.json", "r", encoding="utf-8") as fn:
         results = json.loads(fn.read())
 
     html_table = parse_results(results)

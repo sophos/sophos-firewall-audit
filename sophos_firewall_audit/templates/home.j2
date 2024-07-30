@@ -25,26 +25,18 @@ div {
 a {
   color: yellow;
 }
-th {
-    border: 1px solid gray;
-    height: 50px;
-}
-td {
-    height: 150px;
-    vertical-align: bottom;
-    padding-left: 1em; 
-    padding-right: 1em; 
-    text-align: center; 
-    vertical-align: middle;
-    border: 1px solid gray;
-}
 table {
-  border-collapse: collapse;
+  width: 50%;
 }
-
+th, td {
+  /* border: 1px solid; */
+  height: 50px;
+  padding-left: 10px;
+}
 </style>
 <div>
-    <h1>{{ title }} </h1>
-    <h2>{{ firewall_name }}</h2>
-    {{ table | safe }}   
+  <h1>{{ title }}</h1>
 </div>
+
+</head>
+</html>
