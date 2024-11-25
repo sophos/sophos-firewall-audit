@@ -30,7 +30,7 @@ def eval_snmpv3(fw_obj: SophosFirewall,
     
     for i in range(1,3):
         try:
-            result = fw_obj.get_snmpv3_user()
+            result = fw_obj.get_tag_with_filter(xml_tag="SNMPv3User", key="Username", value=expected["Username"])
         except SophosFirewallZeroRecords:
             result = None
             break
@@ -47,7 +47,7 @@ def eval_snmpv3(fw_obj: SophosFirewall,
     if result:
         actual = result["Response"]["SNMPv3User"]
     else:
-        actual = {}
+        actual = {"Username": "User not found"}
 
     result_dict = {
         "snmpv3": {
