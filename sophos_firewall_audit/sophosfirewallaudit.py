@@ -172,6 +172,8 @@ def main():
         os.mkdir(local_dirname)
         os.mkdir(web_dirname)
 
+    error_list = []
+
     for firewall in firewalls:
         fw = SophosFirewall(
             username=os.environ['VAULT_SECRET_KEY'] if args.use_vault else fw_username,
@@ -184,6 +186,7 @@ def main():
             fw.login()
         except Exception as Error:
             logging.error(f"Error connecting to firewall {firewall['hostname']}: {Error}")
+            error_list.append(f"{firewall['hostname']: {Error}}")
             continue
         
         if not args.rule_export:
@@ -196,7 +199,11 @@ def main():
         generate_audit_output(status_dict, local_dirname, web_dirname)
     elif args.rule_export:
         generate_rule_output(firewalls, local_dirname, web_dirname)
-    
+
+    if error_list:
+        with open("error.log", "w", encoding="utf-8") as f:
+            for line in error_list:
+                f.write(f"{line}\n")
 
 if __name__ == "__main__":
     main()

@@ -105,11 +105,20 @@ if __name__ == "__main__":
     with open(os.path.join(parent_directory, "results.json"), "r", encoding="utf-8") as fn:
         results = json.loads(fn.read())
 
+    error_list = []
+    try:
+        with open(os.path.join(parent_directory, "error.log"), "r", encoding="utf-8") as fn:
+            for line in fn.readlines:
+                error_list.append(line.strip())
+    except FileNotFoundError:
+        logging.warning("File error.log not found. This is normal if there were no connectivity errors during the audit.")
+
     html_table = parse_results(results)
 
     msg_subject = "Firewall Audit Report"
     template = env.get_template("email_body_web.j2")
     msg_body = template.render(html_table=html_table,
+                               error_list=error_list,
                                url=os.environ["URL"])
     logging.info("Sending email...")    
     send_email(msg_subject, msg_body, os.environ["SMTP_RECIPIENT"])
