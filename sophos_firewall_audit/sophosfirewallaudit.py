@@ -186,7 +186,7 @@ def main():
             fw.login()
         except Exception as Error:
             logging.error(f"Error connecting to firewall {firewall['hostname']}: {Error}")
-            error_list.append(f"{firewall['hostname']: {Error}}")
+            error_list.append(f"{firewall['hostname']}: {Error}")
             continue
         
         if not args.rule_export:
