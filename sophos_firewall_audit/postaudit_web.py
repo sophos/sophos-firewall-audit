@@ -108,7 +108,7 @@ if __name__ == "__main__":
     error_list = []
     try:
         with open(os.path.join(parent_directory, "error.log"), "r", encoding="utf-8") as fn:
-            for line in fn.readlines:
+            for line in fn.readlines():
                 error_list.append(line.strip())
     except FileNotFoundError:
         logging.warning("File error.log not found. This is normal if there were no connectivity errors during the audit.")
