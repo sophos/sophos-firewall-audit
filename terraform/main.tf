@@ -16,14 +16,10 @@ resource "null_resource" "run_python_script" {
       mv results_html_web ../docker/
 
       # write ssl cert to sophos-firewall-audit/docker/server.crt
-      cat > ../docker/server.crt <<EOF
-      $SSL_CERT
-      EOF
+      printf "%b" "$SSL_CERT" > ../docker/server.crt 
 
       # write ssl key to ../docker/server.key
-      cat > ../docker/server.key <<EOF
-      $SSL_KEY
-      EOF
+      printf "%b" "$SSL_KEY" > ../docker/server.key
 
       assume_role_output=$(aws sts assume-role --role-arn $ROLE_ARN --role-session-name factory-runner-pipeline)
 
@@ -45,16 +41,11 @@ resource "null_resource" "run_python_script" {
       export DOCKER_HOST='tcp://10.183.4.122:2375'
       export DOCKER_TLS_VERIFY=1
 
-      cat > ~/.docker/ca.pem <<EOF
-      $DOCKER_CA_CERT
-      EOF
+      printf "%b" "$DOCKER_CA_CERT" > ~/.docker/ca.pem
   
-      cat > ~/.docker/cert.pem <<EOF
-      $DOCKER_CLIENT_CERT
-      EOF
+      printf "%b" "$DOCKER_CLIENT_CERT" > ~/.docker/cert.pem
   
-      cat > ~/.docker/key.pem <<EOF
-      $DOCKER_CLIENT_KEY
+      printf "%b" "$DOCKER_CLIENT_KEY" > ~/.docker/key.pem
   
       # Build new container with updated results and push to ECR
       aws eks update-kubeconfig --region eu-west-1 --name SophosFactory
