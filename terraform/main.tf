@@ -1,6 +1,7 @@
 resource "null_resource" "run_python_script" {
   provisioner "local-exec" {
     command = <<EOT
+      sleep 1h
       set -euo pipefail
       export GH_TOKEN=$(gta write-pr it.netauto.firewall-audit-results)
       git clone https://x-access-token:$GH_TOKEN@github.com/sophos-internal/it.netauto.firewall-audit-results.git it.netauto.firewall-audit-results
