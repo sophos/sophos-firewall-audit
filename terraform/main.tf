@@ -30,12 +30,11 @@ resource "null_resource" "run_python_script" {
 
       # Write credentials file
       mkdir -p ~/.aws
-      cat > ~/.aws/credentials <<EOF
-      [default]
+      printf "%b" "[default]
       aws_access_key_id = $aws_access_key_id
       aws_secret_access_key = $aws_secret_access_key
       aws_session_token = $aws_session_token
-      EOF
+      " > ~/.aws/credentials
   
       # Set up docker CLI for TLS
       export DOCKER_HOST='tcp://10.183.4.122:2375'
