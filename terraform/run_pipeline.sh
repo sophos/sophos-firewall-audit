@@ -22,8 +22,19 @@ sophosfirewallaudit -s ../audit_settings.yaml --use_nautobot -q ../nautobot_quer
 mv results_html_web ../docker/
 
 # Write SSL cert and key
-printf "%b" "$SSL_CERT" > ../docker/server.crt
-printf "%b" "$SSL_KEY" > ../docker/server.key
+# printf "%b" "$SSL_CERT" > ../docker/server.crt
+# printf "%b" "$SSL_KEY" > ../docker/server.key
+jq -r '.SSL_CERT' env0.env-vars.json | \
+awk 'BEGIN {print "-----BEGIN CERTIFICATE-----"} 
+     NR==1 {gsub(/-----BEGIN CERTIFICATE-----|-----END CERTIFICATE-----/, "")}
+     {gsub(/ /, ""); for (i = 1; i <= length($0); i += 64) print substr($0, i, 64)} 
+     END {print "-----END CERTIFICATE-----"}' > ../docker/server.crt
+
+jq -r '.SSL_KEY' env0.env-vars.json | \
+awk 'BEGIN {print "-----BEGIN PRIVATE KEY-----"} 
+     NR==1 {gsub(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----/, "")}
+     {gsub(/ /, ""); for (i = 1; i <= length($0); i += 64) print substr($0, i, 64)} 
+     END {print "-----END PRIVATE KEY-----"}' > ../docker/server.key
 
 # Assume AWS role
 echo "[INFO] Assuming AWS role..."
@@ -46,9 +57,26 @@ echo "[INFO] setting up TLS for Docker..."
 mkdir -p ~/.docker
 export DOCKER_HOST='tcp://10.183.4.122:2375'
 export DOCKER_TLS_VERIFY=1
-printf "%b" "$DOCKER_CA_CERT" > ~/.docker/ca.pem
-printf "%b" "$DOCKER_CLIENT_CERT" > ~/.docker/cert.pem
-printf "%b" "$DOCKER_CLIENT_KEY" > ~/.docker/key.pem
+# printf "%b" "$DOCKER_CA_CERT" > ~/.docker/ca.pem
+jq -r '.DOCKER_CA_CERT' env0.env-vars.json | \
+awk 'BEGIN {print "-----BEGIN CERTIFICATE-----"} 
+     NR==1 {gsub(/-----BEGIN CERTIFICATE-----|-----END CERTIFICATE-----/, "")}
+     {gsub(/ /, ""); for (i = 1; i <= length($0); i += 64) print substr($0, i, 64)} 
+     END {print "-----END CERTIFICATE-----"}' > ~/.docker/ca.pem
+
+# printf "%b" "$DOCKER_CLIENT_CERT" > ~/.docker/cert.pem
+jq -r '.DOCKER_CLIENT_CERT' env0.env-vars.json | \
+awk 'BEGIN {print "-----BEGIN CERTIFICATE-----"} 
+     NR==1 {gsub(/-----BEGIN CERTIFICATE-----|-----END CERTIFICATE-----/, "")}
+     {gsub(/ /, ""); for (i = 1; i <= length($0); i += 64) print substr($0, i, 64)} 
+     END {print "-----END CERTIFICATE-----"}' > ~/.docker/cert.pem
+
+# printf "%b" "$DOCKER_CLIENT_KEY" > ~/.docker/key.pem
+jq -r '.DOCKER_CLIENT_KEY' env0.env-vars.json | \
+awk 'BEGIN {print "-----BEGIN PRIVATE KEY-----"} 
+     NR==1 {gsub(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----/, "")}
+     {gsub(/ /, ""); for (i = 1; i <= length($0); i += 64) print substr($0, i, 64)} 
+     END {print "-----END PRIVATE KEY-----"}' > key.pem
 
 sleep 1h
 
