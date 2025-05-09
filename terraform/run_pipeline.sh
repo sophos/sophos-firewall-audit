@@ -86,7 +86,7 @@ aws eks update-kubeconfig --region eu-west-1 --name SophosFactory
 export REVISION=$(helm list --filter 'fwaudit' --output=json | jq -r '.[].revision')
 export TAG=$(python -c "import os; print(int(os.environ['REVISION']) + 1)")
 aws ecr get-login-password | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.eu-west-1.amazonaws.com
-docker build -f ../docker/Dockerfile . -t $AWS_ACCOUNT_ID.dkr.ecr.eu-west-1.amazonaws.com/fwaudit-results:$TAG
+docker build -f ../docker/Dockerfile ../docker -t $AWS_ACCOUNT_ID.dkr.ecr.eu-west-1.amazonaws.com/fwaudit-results:$TAG
 docker push $AWS_ACCOUNT_ID.dkr.ecr.eu-west-1.amazonaws.com/fwaudit-results:$TAG
 
 # Deploy with Helm
