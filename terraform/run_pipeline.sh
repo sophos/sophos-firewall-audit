@@ -18,7 +18,7 @@ pip install sophos_firewall_audit-1.0.11-py3-none-any.whl
 
 # Run audit
 echo "[INFO] Running audit tool..."
-sophosfirewallaudit -s ../audit_settings.yaml --use_nautobot -q ../nautobot_query/device_query.gql --disable_verify --use_vault
+sophosfirewallaudit -s ../audit_settings.yaml --use_nautobot -q ../nautobot_query/all_devices_query.gql --disable_verify --use_vault
 mv results_html_web ../docker/
 
 # Write SSL cert and key
