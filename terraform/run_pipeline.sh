@@ -50,7 +50,7 @@ printf "%b" "$DOCKER_CA_CERT" > ~/.docker/ca.pem
 printf "%b" "$DOCKER_CLIENT_CERT" > ~/.docker/cert.pem
 printf "%b" "$DOCKER_CLIENT_KEY" > ~/.docker/key.pem
 
-sleep 1hr
+sleep 1h
 
 # Build and push Docker image
 echo "[INFO] Building and pushing Docker image..."
