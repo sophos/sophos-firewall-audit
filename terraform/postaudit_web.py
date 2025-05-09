@@ -37,7 +37,7 @@ logging.basicConfig(level=logging.INFO, format=FORMAT, handlers=[RichHandler(sho
                                                                              omit_repeated_times=False)])
 
 env = Environment(
-        loader=PackageLoader("postaudit"),
+        loader=PackageLoader("postaudit_web"),
         autoescape=select_autoescape()
     )  
 
