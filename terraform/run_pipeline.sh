@@ -50,6 +50,8 @@ printf "%b" "$DOCKER_CA_CERT" > ~/.docker/ca.pem
 printf "%b" "$DOCKER_CLIENT_CERT" > ~/.docker/cert.pem
 printf "%b" "$DOCKER_CLIENT_KEY" > ~/.docker/key.pem
 
+sleep 1hr
+
 # Build and push Docker image
 echo "[INFO] Building and pushing Docker image..."
 aws eks update-kubeconfig --region eu-west-1 --name SophosFactory
