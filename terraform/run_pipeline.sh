@@ -73,10 +73,10 @@ awk 'BEGIN {print "-----BEGIN CERTIFICATE-----"}
 
 # printf "%b" "$DOCKER_CLIENT_KEY" > ~/.docker/key.pem
 jq -r '.DOCKER_CLIENT_KEY' env0.env-vars.json | \
-awk 'BEGIN {print "-----BEGIN PRIVATE KEY-----"} 
-     NR==1 {gsub(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----/, "")}
+awk 'BEGIN {print "-----BEGIN RSA PRIVATE KEY-----"} 
+     NR==1 {gsub(/-----BEGIN RSA PRIVATE KEY-----|-----END RSA PRIVATE KEY-----/, "")}
      {gsub(/ /, ""); for (i = 1; i <= length($0); i += 64) print substr($0, i, 64)} 
-     END {print "-----END PRIVATE KEY-----"}' > ~/.docker/key.pem
+     END {print "-----END RSA PRIVATE KEY-----"}' > ~/.docker/key.pem
 
 sleep 1h
 
