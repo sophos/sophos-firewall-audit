@@ -32,13 +32,13 @@ jq -r '.SSL_CERT' env0.env-vars.json | \
 awk 'BEGIN {print "-----BEGIN CERTIFICATE-----"} 
      NR==1 {gsub(/-----BEGIN CERTIFICATE-----|-----END CERTIFICATE-----/, "")}
      {gsub(/ /, ""); for (i = 1; i <= length($0); i += 64) print substr($0, i, 64)} 
-     END {print "-----END CERTIFICATE-----"}' > ../docker/server.crt
+     END {print "-----END CERTIFICATE-----"}' > ./docker/server.crt
 
 jq -r '.SSL_KEY' env0.env-vars.json | \
 awk 'BEGIN {print "-----BEGIN PRIVATE KEY-----"} 
      NR==1 {gsub(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----/, "")}
      {gsub(/ /, ""); for (i = 1; i <= length($0); i += 64) print substr($0, i, 64)} 
-     END {print "-----END PRIVATE KEY-----"}' > ../docker/server.key
+     END {print "-----END PRIVATE KEY-----"}' > ./docker/server.key
 
 echo "[INFO] setting up TLS for Docker..."
 # Docker TLS setup
