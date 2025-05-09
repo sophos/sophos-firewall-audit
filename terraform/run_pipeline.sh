@@ -18,7 +18,7 @@ pip install sophos_firewall_audit-1.0.11-py3-none-any.whl
 
 # Run audit
 echo "[INFO] Running audit tool..."
-sophosfirewallaudit -s ../audit_settings.yaml --use_nautobot -q ../nautobot_query/device_query.gql --disable_verify --use_vault
+sophosfirewallaudit -s ../audit_settings.yaml --use_nautobot -q ../nautobot_query/all_devices_query.gql --disable_verify --use_vault
 mv results_html_web ../docker/
 
 # Write SSL cert and key
@@ -78,7 +78,7 @@ awk 'BEGIN {print "-----BEGIN RSA PRIVATE KEY-----"}
      {gsub(/ /, ""); for (i = 1; i <= length($0); i += 64) print substr($0, i, 64)} 
      END {print "-----END RSA PRIVATE KEY-----"}' > ~/.docker/key.pem
 
-sleep 1h
+# sleep 1h
 
 # Build and push Docker image
 echo "[INFO] Building and pushing Docker image..."
