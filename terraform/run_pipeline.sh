@@ -114,6 +114,6 @@ echo "[INFO] merging PR..."
 python merge_pr.py
 
 echo "[INFO] Sending email..."
-python ../sophos_firewall_audit/postaudit_web.py
+python postaudit_web.py
 
 echo "[INFO] Pipeline completed."
