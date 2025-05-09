@@ -50,7 +50,7 @@ aws_access_key_id = ${aws_access_key_id}
 aws_secret_access_key = ${aws_secret_access_key}
 aws_session_token = ${aws_session_token}
 " > ~/.aws/credentials
-
+export AWS_PROFILE=roleprofile
 
 echo "[INFO] setting up TLS for Docker..."
 # Docker TLS setup
@@ -80,11 +80,11 @@ awk 'BEGIN {print "-----BEGIN RSA PRIVATE KEY-----"}
 
 # Build and push Docker image
 echo "[INFO] Building and pushing Docker image..."
-aws eks update-kubeconfig --region eu-west-1 --name SophosFactory --profile roleprofile
+aws eks update-kubeconfig --region eu-west-1 --name SophosFactory
+aws sts get-caller-identity
 export REVISION=$(helm list --filter 'fwaudit' --output=json | jq -r '.[].revision')
-sleep 1h
 export TAG=$(python -c "import os; print(int(os.environ['REVISION']) + 1)")
-aws ecr get-login-password --profile roleprofile | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.eu-west-1.amazonaws.com
+aws ecr get-login-password | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.eu-west-1.amazonaws.com
 docker build -f ../docker/Dockerfile ../docker -t $AWS_ACCOUNT_ID.dkr.ecr.eu-west-1.amazonaws.com/fwaudit-results:$TAG
 docker push $AWS_ACCOUNT_ID.dkr.ecr.eu-west-1.amazonaws.com/fwaudit-results:$TAG
 
