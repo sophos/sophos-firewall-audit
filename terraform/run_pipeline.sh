@@ -39,16 +39,16 @@ awk 'BEGIN {print "-----BEGIN PRIVATE KEY-----"}
 # Assume AWS role
 echo "[INFO] Assuming AWS role..."
 assume_role_output=$(aws sts assume-role --role-arn $ROLE_ARN --role-session-name factory-runner-pipeline)
-aws_access_key_id=$(echo $assume_role_output | jq -r '.Credentials.AccessKeyId')
-aws_secret_access_key=$(echo $assume_role_output | jq -r '.Credentials.SecretAccessKey')
-aws_session_token=$(echo $assume_role_output | jq -r '.Credentials.SessionToken')
+aws_access_key_id="$(echo "$assume_role_output" | jq -r '.Credentials.AccessKeyId')"
+aws_secret_access_key="$(echo "$assume_role_output" | jq -r '.Credentials.SecretAccessKey')"
+aws_session_token="$(echo "$assume_role_output" | jq -r '.Credentials.SessionToken')"
 
 # Configure AWS CLI
 mkdir -p ~/.aws
 printf "%b" "[default]
-aws_access_key_id = $aws_access_key_id
-aws_secret_access_key = $aws_secret_access_key
-aws_session_token = $aws_session_token
+aws_access_key_id = ${aws_access_key_id}
+aws_secret_access_key = ${aws_secret_access_key}
+aws_session_token = ${aws_session_token}
 " > ~/.aws/credentials
 
 
