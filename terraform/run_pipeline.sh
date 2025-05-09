@@ -71,7 +71,7 @@ aws_session_token="$(echo "$assume_role_output" | jq -r '.Credentials.SessionTok
 
 # Configure AWS CLI
 mkdir -p ~/.aws
-printf "%b" "[roleprofile]
+printf "%b" "[default]
 aws_access_key_id = ${aws_access_key_id}
 aws_secret_access_key = ${aws_secret_access_key}
 aws_session_token = ${aws_session_token}
