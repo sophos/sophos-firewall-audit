@@ -10,8 +10,8 @@ export GH_TOKEN=$(gta write-pr it.netauto.firewall-audit-results)
 git clone https://x-access-token:$GH_TOKEN@github.com/sophos-internal/it.netauto.firewall-audit-results.git it.netauto.firewall-audit-results
 
 # Copy result files
-./copyfiles.sh 'it.netauto.firewall-audit-results/index.html' './results_html_web/'
-./copyfiles.sh 'it.netauto.firewall-audit-results/audit-results*' './results_html_web'
+./terraform/copyfiles.sh 'it.netauto.firewall-audit-results/index.html' './results_html_web/'
+./terraform/copyfiles.sh 'it.netauto.firewall-audit-results/audit-results*' './results_html_web'
 cp it.netauto.firewall-audit-results/audit_settings.yaml ./
 
 # Install audit tool
