@@ -45,7 +45,7 @@ aws_session_token="$(echo "$assume_role_output" | jq -r '.Credentials.SessionTok
 
 # Configure AWS CLI
 mkdir -p ~/.aws
-printf "%b" "[default]
+printf "%b" "[roleprofile]
 aws_access_key_id = ${aws_access_key_id}
 aws_secret_access_key = ${aws_secret_access_key}
 aws_session_token = ${aws_session_token}
@@ -78,14 +78,12 @@ awk 'BEGIN {print "-----BEGIN RSA PRIVATE KEY-----"}
      {gsub(/ /, ""); for (i = 1; i <= length($0); i += 64) print substr($0, i, 64)} 
      END {print "-----END RSA PRIVATE KEY-----"}' > ~/.docker/key.pem
 
-sleep 1h
-
 # Build and push Docker image
 echo "[INFO] Building and pushing Docker image..."
-aws eks update-kubeconfig --region eu-west-1 --name SophosFactory
+aws eks update-kubeconfig --region eu-west-1 --name SophosFactory --profile roleprofile
 export REVISION=$(helm list --filter 'fwaudit' --output=json | jq -r '.[].revision')
 export TAG=$(python -c "import os; print(int(os.environ['REVISION']) + 1)")
-aws ecr get-login-password | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.eu-west-1.amazonaws.com
+aws ecr get-login-password --profile roleprofile | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.eu-west-1.amazonaws.com
 docker build -f ../docker/Dockerfile ../docker -t $AWS_ACCOUNT_ID.dkr.ecr.eu-west-1.amazonaws.com/fwaudit-results:$TAG
 docker push $AWS_ACCOUNT_ID.dkr.ecr.eu-west-1.amazonaws.com/fwaudit-results:$TAG
 
