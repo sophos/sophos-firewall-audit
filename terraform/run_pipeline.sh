@@ -76,7 +76,7 @@ jq -r '.DOCKER_CLIENT_KEY' env0.env-vars.json | \
 awk 'BEGIN {print "-----BEGIN PRIVATE KEY-----"} 
      NR==1 {gsub(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----/, "")}
      {gsub(/ /, ""); for (i = 1; i <= length($0); i += 64) print substr($0, i, 64)} 
-     END {print "-----END PRIVATE KEY-----"}' > key.pem
+     END {print "-----END PRIVATE KEY-----"}' > ~/.docker/key.pem
 
 sleep 1h
 
