@@ -81,6 +81,7 @@ awk 'BEGIN {print "-----BEGIN RSA PRIVATE KEY-----"}
 # Build and push Docker image
 echo "[INFO] Building and pushing Docker image..."
 aws eks update-kubeconfig --region eu-west-1 --name SophosFactory --profile roleprofile
+sleep 1h
 export REVISION=$(helm list --filter 'fwaudit' --output=json | jq -r '.[].revision')
 export TAG=$(python -c "import os; print(int(os.environ['REVISION']) + 1)")
 aws ecr get-login-password --profile roleprofile | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.eu-west-1.amazonaws.com
