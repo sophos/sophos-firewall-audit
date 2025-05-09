@@ -36,22 +36,6 @@ awk 'BEGIN {print "-----BEGIN PRIVATE KEY-----"}
      {gsub(/ /, ""); for (i = 1; i <= length($0); i += 64) print substr($0, i, 64)} 
      END {print "-----END PRIVATE KEY-----"}' > ../docker/server.key
 
-# Assume AWS role
-echo "[INFO] Assuming AWS role..."
-assume_role_output=$(aws sts assume-role --role-arn $ROLE_ARN --role-session-name factory-runner-pipeline)
-aws_access_key_id="$(echo "$assume_role_output" | jq -r '.Credentials.AccessKeyId')"
-aws_secret_access_key="$(echo "$assume_role_output" | jq -r '.Credentials.SecretAccessKey')"
-aws_session_token="$(echo "$assume_role_output" | jq -r '.Credentials.SessionToken')"
-
-# Configure AWS CLI
-mkdir -p ~/.aws
-printf "%b" "[roleprofile]
-aws_access_key_id = ${aws_access_key_id}
-aws_secret_access_key = ${aws_secret_access_key}
-aws_session_token = ${aws_session_token}
-" > ~/.aws/credentials
-export AWS_PROFILE=roleprofile
-
 echo "[INFO] setting up TLS for Docker..."
 # Docker TLS setup
 mkdir -p ~/.docker
@@ -78,10 +62,29 @@ awk 'BEGIN {print "-----BEGIN RSA PRIVATE KEY-----"}
      {gsub(/ /, ""); for (i = 1; i <= length($0); i += 64) print substr($0, i, 64)} 
      END {print "-----END RSA PRIVATE KEY-----"}' > ~/.docker/key.pem
 
+# Assume AWS role
+echo "[INFO] Assuming AWS role..."
+assume_role_output=$(aws sts assume-role --role-arn $ROLE_ARN --role-session-name factory-runner-pipeline)
+aws_access_key_id="$(echo "$assume_role_output" | jq -r '.Credentials.AccessKeyId')"
+aws_secret_access_key="$(echo "$assume_role_output" | jq -r '.Credentials.SecretAccessKey')"
+aws_session_token="$(echo "$assume_role_output" | jq -r '.Credentials.SessionToken')"
+
+# Configure AWS CLI
+mkdir -p ~/.aws
+printf "%b" "[roleprofile]
+aws_access_key_id = ${aws_access_key_id}
+aws_secret_access_key = ${aws_secret_access_key}
+aws_session_token = ${aws_session_token}
+" > ~/.aws/credentials
+
+unset AWS_ACCESS_KEY_ID
+unset AWS_SECRET_ACCESS_KEY
+
+aws sts get-caller-identity
+
 # Build and push Docker image
 echo "[INFO] Building and pushing Docker image..."
 aws eks update-kubeconfig --region eu-west-1 --name SophosFactory
-aws sts get-caller-identity
 export REVISION=$(helm list --filter 'fwaudit' --output=json | jq -r '.[].revision')
 export TAG=$(python -c "import os; print(int(os.environ['REVISION']) + 1)")
 aws ecr get-login-password | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.eu-west-1.amazonaws.com
