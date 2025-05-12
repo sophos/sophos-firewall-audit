@@ -22,7 +22,7 @@ pip install sophos_firewall_audit-1.0.11-py3-none-any.whl
 # Run audit
 echo "[INFO] Running audit tool..."
 
-sophosfirewallaudit -s audit_settings.yaml --use_nautobot -q ../nautobot_query/device_query.gql --disable_verify --use_vault
+sophosfirewallaudit -s audit_settings.yaml --use_nautobot -q ../nautobot_query/all_devices_query.gql --disable_verify --use_vault
 mv results_html_web ../docker/results_html_web
 
 echo "[INFO] Listing files in current working directory: $(pwd)"
@@ -96,22 +96,21 @@ unset AWS_SECRET_ACCESS_KEY
 aws sts get-caller-identity
 
 # Build and push Docker image
-# echo "[INFO] Building and pushing Docker image..."
-# aws eks update-kubeconfig --region eu-west-1 --name SophosFactory
-# export REVISION=$(helm list --filter 'fwaudit' --output=json | jq -r '.[].revision')
-# export TAG=$(python -c "import os; print(int(os.environ['REVISION']) + 1)")
-# aws ecr get-login-password | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.eu-west-1.amazonaws.com
-# docker build -f ../docker/Dockerfile ../docker -t $AWS_ACCOUNT_ID.dkr.ecr.eu-west-1.amazonaws.com/fwaudit-results:$TAG
-# docker push $AWS_ACCOUNT_ID.dkr.ecr.eu-west-1.amazonaws.com/fwaudit-results:$TAG
+echo "[INFO] Building and pushing Docker image..."
+aws eks update-kubeconfig --region eu-west-1 --name SophosFactory
+export REVISION=$(helm list --filter 'fwaudit' --output=json | jq -r '.[].revision')
+export TAG=$(python -c "import os; print(int(os.environ['REVISION']) + 1)")
+aws ecr get-login-password | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.eu-west-1.amazonaws.com
+docker build -f ../docker/Dockerfile ../docker -t $AWS_ACCOUNT_ID.dkr.ecr.eu-west-1.amazonaws.com/fwaudit-results:$TAG
+docker push $AWS_ACCOUNT_ID.dkr.ecr.eu-west-1.amazonaws.com/fwaudit-results:$TAG
 
 # # Deploy with Helm
-# echo "[INFO] Upgrading Helm release..."
-# helm upgrade fwaudit ../helm-chart -f ../helm-chart/values.yaml --set fwaudit.image.tag=$TAG
+echo "[INFO] Upgrading Helm release..."
+helm upgrade fwaudit ../helm-chart -f ../helm-chart/values.yaml --set fwaudit.image.tag=$TAG
 
 echo "[INFO] Copy and push results to GitHub..."
 # Copy and push results to GitHub
 export ROOT_DIR="$(pwd)"
-# export SOURCE_DIR="${ROOT_DIR}/docker/results_html_web/*"
 cp -r ../docker/results_html_web/* /tmp/it.netauto.firewall-audit-results/
 cd /tmp/it.netauto.firewall-audit-results
 echo "[INFO] Working directory changed to: $(pwd)"
@@ -119,20 +118,20 @@ git checkout -b factory-pipeline-results
 echo "[INFO] Listing files in current working directory: $(pwd)"
 ls -l
 
-# git config --global user.email "factory-it-admins@sophos.com"
-# git config --global user.name "Factory Pipeline"
-# git add .
-# git commit -m "audit results updated"
-# git push --set-upstream origin factory-pipeline-results
+git config --global user.email "factory-it-admins@sophos.com"
+git config --global user.name "Factory Pipeline"
+git add .
+git commit -m "audit results updated"
+git push --set-upstream origin factory-pipeline-results
 
 
-# cd $ROOT_DIR
-# echo "[INFO] Working directory changed to: $(pwd)"
-# echo "[INFO] merging PR..."
-# # Merge PR and notify
-# python merge_pr.py
+cd $ROOT_DIR
+echo "[INFO] Working directory changed to: $(pwd)"
+echo "[INFO] merging PR..."
+# Merge PR and notify
+python merge_pr.py
 
-# echo "[INFO] Sending email..."
-# python postaudit_web.py
+echo "[INFO] Sending email..."
+python postaudit_web.py
 
 echo "[INFO] Pipeline completed."
