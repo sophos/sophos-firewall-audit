@@ -111,12 +111,11 @@ aws sts get-caller-identity
 echo "[INFO] Copy and push results to GitHub..."
 # Copy and push results to GitHub
 export ROOT_DIR="$(pwd)"
-export SOURCE_DIR="${ROOT_DIR}/docker/results_html_web/*"
+# export SOURCE_DIR="${ROOT_DIR}/docker/results_html_web/*"
+cp -r ../docker/results_html_web /tmp/it.netauto.firewall-audit-results/
 cd /tmp/it.netauto.firewall-audit-results
 echo "[INFO] Working directory changed to: $(pwd)"
 git checkout -b factory-pipeline-results
-cp -r $SOURCE_DIR .
-
 echo "[INFO] Listing files in current working directory: $(pwd)"
 ls -l
 
