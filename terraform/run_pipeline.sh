@@ -23,16 +23,16 @@ pip install sophos_firewall_audit-1.0.11-py3-none-any.whl
 echo "[INFO] Running audit tool..."
 
 sophosfirewallaudit -s audit_settings.yaml --use_nautobot -q ../nautobot_query/device_query.gql --disable_verify --use_vault
-mv results_html_web docker/results_html_web
+mv results_html_web ../docker/results_html_web
 
 echo "[INFO] Listing files in current working directory: $(pwd)"
 ls -l 
-echo "[INFO] Listing files in ./docker"
-ls -l ./docker
-echo "INFO" Listing files in ./docker/results_html_web
-ls -l ./docker/results_html_web
+echo "[INFO] Listing files in ../docker"
+ls -l ../docker
+echo "INFO" Listing files in ../docker/results_html_web
+ls -l ../docker/results_html_web
 echo "[INFO] Display index.html content"
-cat ./docker/results_html_web/index.html
+cat ../docker/results_html_web/index.html
 
 # Write SSL cert and key
 # printf "%b" "$SSL_CERT" > ../docker/server.crt
@@ -41,13 +41,13 @@ jq -r '.SSL_CERT' ./env0.env-vars.json | \
 awk 'BEGIN {print "-----BEGIN CERTIFICATE-----"} 
      NR==1 {gsub(/-----BEGIN CERTIFICATE-----|-----END CERTIFICATE-----/, "")}
      {gsub(/ /, ""); for (i = 1; i <= length($0); i += 64) print substr($0, i, 64)} 
-     END {print "-----END CERTIFICATE-----"}' > ./docker/server.crt
+     END {print "-----END CERTIFICATE-----"}' > ../docker/server.crt
 
 jq -r '.SSL_KEY' ./env0.env-vars.json | \
 awk 'BEGIN {print "-----BEGIN PRIVATE KEY-----"} 
      NR==1 {gsub(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----/, "")}
      {gsub(/ /, ""); for (i = 1; i <= length($0); i += 64) print substr($0, i, 64)} 
-     END {print "-----END PRIVATE KEY-----"}' > ./docker/server.key
+     END {print "-----END PRIVATE KEY-----"}' > ../docker/server.key
 
 echo "[INFO] setting up TLS for Docker..."
 # Docker TLS setup
@@ -101,7 +101,7 @@ aws sts get-caller-identity
 # export REVISION=$(helm list --filter 'fwaudit' --output=json | jq -r '.[].revision')
 # export TAG=$(python -c "import os; print(int(os.environ['REVISION']) + 1)")
 # aws ecr get-login-password | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.eu-west-1.amazonaws.com
-# docker build -f ./docker/Dockerfile ./docker -t $AWS_ACCOUNT_ID.dkr.ecr.eu-west-1.amazonaws.com/fwaudit-results:$TAG
+# docker build -f ../docker/Dockerfile ../docker -t $AWS_ACCOUNT_ID.dkr.ecr.eu-west-1.amazonaws.com/fwaudit-results:$TAG
 # docker push $AWS_ACCOUNT_ID.dkr.ecr.eu-west-1.amazonaws.com/fwaudit-results:$TAG
 
 # # Deploy with Helm
