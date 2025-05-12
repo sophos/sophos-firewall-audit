@@ -12,6 +12,15 @@
       </svg>
     </a>
  </div>
+ <script>
+  function viewResult() {
+      const dropdown = document.getElementById('auditDropdown');
+      const selectedUrl = dropdown.value;
+      if (selectedUrl) {
+          window.location.href = selectedUrl;
+      }
+  }
+</script>
 </head>
 <style>
 body {
@@ -36,6 +45,11 @@ th, td {
 </style>
 <div>
   <h1>{{ title }}</h1>
+  <label for="auditDropdown">Select an audit result:</label>
+  <select id="auditDropdown">
+  
+  </select>
+  <button onclick="viewResult()">View Results</button>
 </div>
 
 </head>

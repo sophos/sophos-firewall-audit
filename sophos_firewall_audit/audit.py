@@ -211,7 +211,7 @@ def generate_audit_output(status_dict, local_dirname, web_dirname):
         fn.write(json.dumps(status_dict))
 
     for dirname in [local_dirname, web_dirname]:
-        index_html = template.render(status_dict=status_dict, dirname=dirname, title="Firewall Audit Report")
+        index_html = template.render(status_dict=status_dict, dirname=dirname, title=f"Firewall Audit Report - {dirname.split(os.sep)[1]}")
 
         with open(os.path.join(dirname, 'index.html'), "w", encoding="utf-8") as fn:
             fn.write(index_html)
@@ -223,7 +223,7 @@ def generate_audit_output(status_dict, local_dirname, web_dirname):
                 with open(os.path.join("results_html_web", "index.html"), "r", encoding="utf-8") as fn:
                     home_html = fn.readlines()
             except FileNotFoundError:
-                home_html = home_template.render(title="Firewall Audit").splitlines(True)
+                home_html = home_template.render(title="Firewall Audit Report").splitlines(True)
                 with open(os.path.join("results_html_web", "index.html"), "w", encoding="utf-8") as fn:
                     fn.writelines(home_html)
         else:
@@ -231,22 +231,22 @@ def generate_audit_output(status_dict, local_dirname, web_dirname):
                 with open(os.path.join("results_html_local", "index.html"), "r", encoding="utf-8") as fn:
                     home_html = fn.readlines()
             except FileNotFoundError:
-                home_html = home_template.render(title="Firewall Audit").splitlines(True)
+                home_html = home_template.render(title="Firewall Audit Report").splitlines(True)
                 with open(os.path.join("results_html_local", "index.html"), "w", encoding="utf-8") as fn:
                     fn.writelines(home_html)                  
 
         updated_home_html = []
 
         for line in home_html:
-            if "<h1>Firewall Audit</h1>" in line:
+            if '<select id="auditDropdown">' in line:
                 updated_home_html.append(line)
                 if "web" in dirname:
                     updated_home_html.append(
-                        f'<a style="text-align: left;" href="/{dirname.split(os.sep)[1]}/index.html">{dirname.split(os.sep)[1]}</a><br/>\n'
+                        f'<option value="/{dirname.split(os.sep)[1]}/index.html">{dirname.split(os.sep)[1]}</option>\n'
                     )
                 else:
                     updated_home_html.append(
-                        f'<a style="text-align: left;" href="file:{dirname.split(os.sep)[1]}/index.html">{dirname.split(os.sep)[1]}</a><br/>\n'
+                        f'<option value="file:{dirname.split(os.sep)[1]}/index.html">{dirname.split(os.sep)[1]}</option>\n'
                     )
             else:
                 updated_home_html.append(line)
