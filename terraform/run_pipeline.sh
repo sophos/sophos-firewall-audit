@@ -1,18 +1,18 @@
 #!/bin/bash
 set -euo pipefail
-cd ../
 
-echo "[INFO] Working directory changed to: $(pwd)"
+echo "[INFO] Working directory: $(pwd)"
 
 # Clone repo
 echo "[INFO] Cloning GitHub repository..."
 export GH_TOKEN=$(gta write-pr it.netauto.firewall-audit-results)
-git clone https://x-access-token:$GH_TOKEN@github.com/sophos-internal/it.netauto.firewall-audit-results.git it.netauto.firewall-audit-results
+git clone https://x-access-token:$GH_TOKEN@github.com/sophos-internal/it.netauto.firewall-audit-results.git /tmp/it.netauto.firewall-audit-results
 
 # Copy result files
-./terraform/copyfiles.sh 'it.netauto.firewall-audit-results/index.html' './results_html_web/'
-./terraform/copyfiles.sh 'it.netauto.firewall-audit-results/audit-results*' './results_html_web'
-cp it.netauto.firewall-audit-results/audit_settings.yaml ./
+mkdir results_html_web
+./copyfiles.sh '/tmp/it.netauto.firewall-audit-results/index.html' './results_html_web/'
+./copyfiles.sh '/tmp/it.netauto.firewall-audit-results/audit-results*' './results_html_web'
+cp /tmp/it.netauto.firewall-audit-results/audit_settings.yaml ./
 
 # Install audit tool
 echo "[INFO] Installing sophos_firewall_audit..."
@@ -22,19 +22,28 @@ pip install sophos_firewall_audit-1.0.11-py3-none-any.whl
 # Run audit
 echo "[INFO] Running audit tool..."
 
-sophosfirewallaudit -s audit_settings.yaml --use_nautobot -q nautobot_query/all_devices_query.gql --disable_verify --use_vault
+sophosfirewallaudit -s audit_settings.yaml --use_nautobot -q ../nautobot_query/all_devices_query.gql --disable_verify --use_vault
 mv results_html_web docker/
+
+echo "[INFO] Listing files in current working directory: $(pwd)"
+ls -l 
+echo "[INFO] Listing files in ./docker"
+ls -l ./docker
+echo "INFO" Listing files in ./docker/results_html_web
+ls -l ./docker/results_html_web
+echo "[INFO] Display index.html content"
+cat ./docker/results_html_web/index.html
 
 # Write SSL cert and key
 # printf "%b" "$SSL_CERT" > ../docker/server.crt
 # printf "%b" "$SSL_KEY" > ../docker/server.key
-jq -r '.SSL_CERT' ./terraform/env0.env-vars.json | \
+jq -r '.SSL_CERT' ./env0.env-vars.json | \
 awk 'BEGIN {print "-----BEGIN CERTIFICATE-----"} 
      NR==1 {gsub(/-----BEGIN CERTIFICATE-----|-----END CERTIFICATE-----/, "")}
      {gsub(/ /, ""); for (i = 1; i <= length($0); i += 64) print substr($0, i, 64)} 
      END {print "-----END CERTIFICATE-----"}' > ./docker/server.crt
 
-jq -r '.SSL_KEY' ./terraform/env0.env-vars.json | \
+jq -r '.SSL_KEY' ./env0.env-vars.json | \
 awk 'BEGIN {print "-----BEGIN PRIVATE KEY-----"} 
      NR==1 {gsub(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----/, "")}
      {gsub(/ /, ""); for (i = 1; i <= length($0); i += 64) print substr($0, i, 64)} 
@@ -46,21 +55,21 @@ mkdir -p ~/.docker
 export DOCKER_HOST='tcp://10.183.4.122:2375'
 export DOCKER_TLS_VERIFY=1
 # printf "%b" "$DOCKER_CA_CERT" > ~/.docker/ca.pem
-jq -r '.DOCKER_CA_CERT' ./terraform/env0.env-vars.json | \
+jq -r '.DOCKER_CA_CERT' ./env0.env-vars.json | \
 awk 'BEGIN {print "-----BEGIN CERTIFICATE-----"} 
      NR==1 {gsub(/-----BEGIN CERTIFICATE-----|-----END CERTIFICATE-----/, "")}
      {gsub(/ /, ""); for (i = 1; i <= length($0); i += 64) print substr($0, i, 64)} 
      END {print "-----END CERTIFICATE-----"}' > ~/.docker/ca.pem
 
 # printf "%b" "$DOCKER_CLIENT_CERT" > ~/.docker/cert.pem
-jq -r '.DOCKER_CLIENT_CERT' ./terraform/env0.env-vars.json | \
+jq -r '.DOCKER_CLIENT_CERT' ./env0.env-vars.json | \
 awk 'BEGIN {print "-----BEGIN CERTIFICATE-----"} 
      NR==1 {gsub(/-----BEGIN CERTIFICATE-----|-----END CERTIFICATE-----/, "")}
      {gsub(/ /, ""); for (i = 1; i <= length($0); i += 64) print substr($0, i, 64)} 
      END {print "-----END CERTIFICATE-----"}' > ~/.docker/cert.pem
 
 # printf "%b" "$DOCKER_CLIENT_KEY" > ~/.docker/key.pem
-jq -r '.DOCKER_CLIENT_KEY' ./terraform/env0.env-vars.json | \
+jq -r '.DOCKER_CLIENT_KEY' ./env0.env-vars.json | \
 awk 'BEGIN {print "-----BEGIN RSA PRIVATE KEY-----"} 
      NR==1 {gsub(/-----BEGIN RSA PRIVATE KEY-----|-----END RSA PRIVATE KEY-----/, "")}
      {gsub(/ /, ""); for (i = 1; i <= length($0); i += 64) print substr($0, i, 64)} 
@@ -97,15 +106,19 @@ docker push $AWS_ACCOUNT_ID.dkr.ecr.eu-west-1.amazonaws.com/fwaudit-results:$TAG
 
 # Deploy with Helm
 echo "[INFO] Upgrading Helm release..."
-helm upgrade fwaudit ./helm-chart -f ./helm-chart/values.yaml --set fwaudit.image.tag=$TAG
+helm upgrade fwaudit ../helm-chart -f ../helm-chart/values.yaml --set fwaudit.image.tag=$TAG
 
 echo "[INFO] Copy and push results to GitHub..."
 # Copy and push results to GitHub
-cd it.netauto.firewall-audit-results
+export ROOT_DIR="$(pwd)"
+export SOURCE_DIR="${ROOT_DIR}/docker/results_html_web/*"
+cd /tmp/it.netauto.firewall-audit-results
 echo "[INFO] Working directory changed to: $(pwd)"
-export SOURCE_DIR="../docker/results_html_web/*"
 git checkout -b factory-pipeline-results
 cp -r $SOURCE_DIR .
+
+echo "[INFO] Listing files in current working directory: $(pwd)"
+ls -l
 
 git config --global user.email "factory-it-admins@sophos.com"
 git config --global user.name "Factory Pipeline"
@@ -113,7 +126,8 @@ git add .
 git commit -m "audit results updated"
 git push --set-upstream origin factory-pipeline-results
 
-cd ../terraform
+
+cd $ROOT_DIR
 echo "[INFO] Working directory changed to: $(pwd)"
 echo "[INFO] merging PR..."
 # Merge PR and notify
