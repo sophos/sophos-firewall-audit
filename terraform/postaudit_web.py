@@ -26,7 +26,7 @@ import os
 import logging
 import json
 import smtplib
-from prettytable import PrettyTable, ALL
+from prettytable import PrettyTable, HRuleStyle
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from rich.logging import RichHandler
@@ -37,7 +37,7 @@ logging.basicConfig(level=logging.INFO, format=FORMAT, handlers=[RichHandler(sho
                                                                              omit_repeated_times=False)])
 
 env = Environment(
-        loader=PackageLoader("postaudit"),
+        loader=PackageLoader("postaudit_web"),
         autoescape=select_autoescape()
     )  
 
@@ -88,7 +88,7 @@ def parse_results(results):
         _type_: _description_
     """
     table = PrettyTable()
-    table.hrules = ALL
+    table.hrules = HRuleStyle.ALL
     table.field_names = ["Hostname", "Passed", "Failed"]
     
     for firewall in results:
@@ -100,14 +100,14 @@ def parse_results(results):
 
 if __name__ == "__main__":
     
-    current_directory = os.path.dirname(os.path.abspath(__file__))
-    parent_directory = os.path.dirname(current_directory)
-    with open(os.path.join(parent_directory, "results.json"), "r", encoding="utf-8") as fn:
+    # current_directory = os.path.dirname(os.path.abspath(__file__))
+    # parent_directory = os.path.dirname(current_directory)
+    with open("results.json", "r", encoding="utf-8") as fn:
         results = json.loads(fn.read())
 
     error_list = []
     try:
-        with open(os.path.join(parent_directory, "error.log"), "r", encoding="utf-8") as fn:
+        with open("error.log", "r", encoding="utf-8") as fn:
             for line in fn.readlines():
                 error_list.append(line.strip())
     except FileNotFoundError:

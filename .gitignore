@@ -6,6 +6,7 @@ audit-results*
 results.json
 *.crt
 *.key
+*.csr
 audit_settings.yaml
 __pycache__/
 dist/

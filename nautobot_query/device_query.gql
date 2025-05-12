@@ -1,5 +1,5 @@
 query {
-  devices(name: ["us-bos-utm-stage-1"]) {
+  devices(name: ["uk-abn-utm-stage-1"]) {
     name
   }
 }
