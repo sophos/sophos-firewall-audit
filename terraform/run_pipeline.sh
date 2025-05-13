@@ -16,8 +16,8 @@ cp /tmp/it.netauto.firewall-audit-results/audit_settings.yaml ./
 
 # Install audit tool
 echo "[INFO] Installing sophos_firewall_audit..."
-gh release download v1.0.11 --repo github.com/sophos/sophos-firewall-audit
-pip install sophos_firewall_audit-1.0.11-py3-none-any.whl
+gh release download v1.0.12 --repo github.com/sophos/sophos-firewall-audit
+pip install sophos_firewall_audit-1.0.12-py3-none-any.whl
 
 # Run audit
 echo "[INFO] Running audit tool..."
