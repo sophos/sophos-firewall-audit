@@ -59,7 +59,12 @@ def eval_syslog(fw_obj: SophosFirewall,
                 settings_dict[settings_category][setting]["Name"] = container_name
                 settings_dict[settings_category][setting]["Expected"] = settings_container['LogSettings'][settings_category][setting]
                 if container_name in actual_settings:
-                    settings_dict[settings_category][setting]["Actual"] = actual_settings[container_name][settings_category][setting]
+                    # Fix for v22 where settings under LogSettings > ATP were changed
+                    # Makes sure the setting actually exists before trying to access it
+                    if setting in actual_settings[container_name][settings_category]: 
+                        settings_dict[settings_category][setting]["Actual"] = actual_settings[container_name][settings_category][setting]
+                    else:
+                        settings_dict[settings_category].pop(setting)
                 else:
                     settings_dict[settings_category][setting]["Actual"] = f"{container_name} not configured!"
         results.append(settings_dict)
