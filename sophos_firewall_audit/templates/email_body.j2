@@ -1,9 +1,225 @@
-<b>Firewall Audit Results</b>
-<br/>
-{{ html_table }}
-<br/>
-Please download and review the detailed results <a href="{{ s3_url }}">here</a>.
-<br/>
-<br/>
-This link will be available for 12 hours from the time of this message.  Once the link expires, the report can be downloaded
-from the S3 bucket "sophos-firewall-audit" in the IT-GIS-NETWORK-PROD AWS account.   
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firewall Audit Results</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+
+        .email-container {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e9ecef;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #005BC8;
+        }
+
+        .header-logo {
+            margin-bottom: 15px;
+        }
+
+        .header-logo {
+            margin-bottom: 15px;
+        }
+
+        .header-logo img {
+            height: 32px;
+            width: auto;
+        }
+
+        .header h1 {
+            color: #005BC8;
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0;
+            text-shadow: 1px 1px 2px rgba(0, 91, 200, 0.1);
+        }
+
+        .content {
+            margin-bottom: 25px;
+        }
+
+        .download-section {
+            background: linear-gradient(135deg, #005BC8, #003d8f);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .download-link {
+            display: inline-block;
+            background: #ffd700;
+            color: #003d8f;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .download-link:hover {
+            background: #ffed4e;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+        }
+
+        .info-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-left: 4px solid #f39c12;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .info-box p {
+            margin: 0;
+            color: #856404;
+            font-weight: 500;
+        }
+
+        /* Style for the embedded table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.95rem;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        th {
+            background: #005BC8;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.85rem;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e9ecef;
+            transition: background-color 0.3s ease;
+        }
+
+        tr:hover td {
+            background-color: #f8f9fa;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Status indicators for table cells */
+        .status-pass {
+            background: #d4edda !important;
+            color: #155724;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .status-fail {
+            background: #f8d7da !important;
+            color: #721c24;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+            font-size: 0.9rem;
+            color: #6c757d;
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            .email-container {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .download-link {
+                padding: 10px 20px;
+                font-size: 1rem;
+            }
+
+            table {
+                font-size: 0.85rem;
+            }
+
+            th, td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <div class="header-logo">
+                <img src="https://cdn.cookielaw.org/logos/8814ea97-7d41-4933-8a06-f5b8e65f6da8/019875a3-220e-7660-b879-5fc4d8416586/902ccc58-4d41-43a9-8194-dfe1b4404bb0/sophos-logo@2x.png" 
+                     alt="Sophos" />
+            </div>
+            <h1>Firewall Audit Results</h1>
+        </div>
+
+        <div class="content">
+            {{ html_table }}
+        </div>
+
+        <div class="download-section">
+            <p style="margin-bottom: 15px; font-size: 1.1rem;">
+                <strong>Download Detailed Results</strong>
+            </p>
+            <a href="{{ s3_url }}" class="download-link">Download Report</a>
+        </div>
+
+        <div class="info-box">
+            <p>
+                <strong>Important:</strong> This download link will be available for 12 hours from the time of this message. 
+                Once the link expires, the report can be downloaded from the S3 bucket "sophos-firewall-audit" 
+                in the IT-GIS-NETWORK-PROD AWS account.
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>This is an automated report generated by the Sophos Firewall Audit system.</p>
+        </div>
+    </div>
+</body>
+</html>   
