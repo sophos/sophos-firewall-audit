@@ -1,5 +1,12 @@
 query {
   devices (manufacturer: "Sophos", tags: "SFOS", tags__n: "Auxillary", status: "Active") {
     name
+    location {
+      parent {
+        parent {
+          name
+        }
+      }
+    }
   }
 }

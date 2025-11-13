@@ -27,7 +27,7 @@ def eval_dns_servers(fw_obj: SophosFirewall,
         dict: Audit results and output table(s)
     """
 
-    expected_servers = sorted(settings["dns_servers"])
+    expected_servers = sorted(settings["dns_servers"].get(fw_obj.region))
 
     for i in range(1,3):
         try:
