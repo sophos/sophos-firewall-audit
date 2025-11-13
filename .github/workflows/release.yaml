@@ -30,6 +30,18 @@ jobs:
         run: |
           poetry build
 
+      - name: Rename wheel file to include 'v' prefix
+        run: |
+          cd dist
+          for file in *.whl; do
+            # Extract version from tag (remove 'v' prefix)
+            VERSION=${GITHUB_REF#refs/tags/v}
+            # Create new filename with 'v' prefix
+            NEW_NAME=$(echo $file | sed "s/-${VERSION}-/-v${VERSION}-/")
+            mv "$file" "$NEW_NAME"
+            echo "Renamed $file to $NEW_NAME"
+          done
+
       - name: Create Release and Upload Wheel
         id: create_release
         uses: softprops/action-gh-release@v1
