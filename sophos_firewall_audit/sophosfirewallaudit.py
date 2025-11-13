@@ -58,7 +58,11 @@ def nb_graphql_query(query, verify):
     token = os.environ.get("NAUTOBOT_TOKEN")
     nautobot = api(url=url, token=token, verify=verify)
     graphql_response = nautobot.graphql.query(query=query)
-    return [{"hostname": firewall["name"], "port": "4444"} for firewall in graphql_response.json["data"]["devices"]]
+    return [{"hostname": firewall["name"], "port": "4444",
+             "region": firewall["location"]["parent"]["parent"]["name"].lower()} 
+               for firewall in graphql_response.json["data"]["devices"]
+               if firewall["location"]["parent"].get("parent")
+               ]
 
 def device_query(environ, devices):
     """Generate GraphQL query
@@ -182,6 +186,7 @@ def main():
             port=firewall['port'],
             verify=False
         )
+        fw.region = firewall.get("region")
         try:
             fw.login()
         except Exception as Error:

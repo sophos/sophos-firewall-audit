@@ -329,18 +329,26 @@ login_security:
   DefaultConfigurationLanguage: English
 
 # DNS Servers (Configure > Network > DNS)
+# Nest under the region. Region should be defined in inventory
 dns_servers:
-  - 4.2.2.1
-  - 4.2.2.2
+  na:
+    - 4.2.2.1
+    - 4.2.2.2
+  emea:
+    - 1.1.1.1
 
 # SNMPv3 (System > Administration > SNMP)
 snmpv3:
   Username: snmpv3_user
   AcceptQueries: Enable
   SendTraps: Enable
-  AuthorizedHosts: 
-    - 10.1.100.101
-    - 10.1.100.102
+  AuthorizedHosts:
+    na:  
+      - 10.1.100.101
+      - 10.1.100.102
+    emea:
+      - 10.2.100.101
+      - 10.2.100.102
 
 # Time Settings (System > Administration > Time)
 time:

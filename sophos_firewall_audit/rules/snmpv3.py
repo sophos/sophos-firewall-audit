@@ -30,7 +30,7 @@ def eval_snmpv3(fw_obj: SophosFirewall,
     
     for i in range(1,3):
         try:
-            result = fw_obj.get_tag_with_filter(xml_tag="SNMPv3User", key="Username", value=expected["Username"])
+            result = fw_obj.get_tag_with_filter(xml_tag="SNMPv3User", key="Username", value=expected["Username"], operator="=")
         except SophosFirewallZeroRecords:
             result = None
             break
@@ -61,21 +61,25 @@ def eval_snmpv3(fw_obj: SophosFirewall,
 
     # Changes for v22
     if result:
-        if result["Response"]["@APIVersion"][:2] >= "22":
+        if int(result["Response"]["@APIVersion"][:2]) >= 22:
             # Remove Name key since it did not exist pre-v22
             actual.pop("Name")
-            # Rename "AuthorizedHosts" to "AuthorizedHostsIpv4" in expected
-            expected["AuthorizedHostsIpv4"] = expected.pop("AuthorizedHosts")
+            # Rename  "AuthorizedHostsIpv4" to "AuthorizedHosts" to in actual
+            actual["AuthorizedHosts"] = actual.pop("AuthorizedHostsIpv4")
             # Convert SendTraps and AcceptQueries from "Enabled/Disabled" to True/False
             expected["SendTraps"] = "true" if expected["SendTraps"] == "Enabled" else "false"
             expected["AcceptQueries"] = "true" if expected["AcceptQueries"] == "Enabled" else "false"
 
-    
     output = []
     for key in expected:
         status = "AUDIT_PASS"
         if key in actual:
-            if not expected[key] == actual[key]:
+            if key == "AuthorizedHosts":
+                if not expected[key].get(fw_obj.region) == actual[key]:
+                    status = "AUDIT_FAIL"
+                    result_dict["audit_result"] = "FAIL"
+                    result_dict["fail_ct"] += 1
+            elif not expected[key] == actual[key]:
                 status = "AUDIT_FAIL"
                 result_dict["audit_result"] = "FAIL"
                 result_dict["fail_ct"] += 1
@@ -88,7 +92,7 @@ def eval_snmpv3(fw_obj: SophosFirewall,
             result_dict["fail_ct"] += 1
 
         if key == "AuthorizedHosts" and not actual.get(key) == "None" and status == "AUDIT_FAIL":
-            actual_output = '\n'.join(format_diff(unified_diff(sorted(expected[key]), sorted(actual.get(key)), n=1000000000)))
+            actual_output = '\n'.join(format_diff(unified_diff(sorted(expected[key].get(fw_obj.region)), sorted(actual.get(key)), n=1000000000)))
         elif key == "AuthorizedHosts" and not actual.get(key) == "None" and status == "AUDIT_PASS":
             actual_output = '\n'.join(actual.get(key))
         else:
@@ -98,7 +102,7 @@ def eval_snmpv3(fw_obj: SophosFirewall,
                 "SNMPv3",
                 "System > Administration > SNMP",
                 key,
-                '\n'.join(expected[key]) if key == "AuthorizedHosts" else expected[key],
+                '\n'.join(expected[key].get(fw_obj.region)) if key == "AuthorizedHosts" else expected[key],
                 actual_output,
                 html_status(status)
             ])
