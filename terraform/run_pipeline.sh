@@ -15,9 +15,10 @@ mkdir results_html_web
 cp /tmp/it.netauto.firewall-audit-results/audit_settings.yaml ./
 
 # Install audit tool
-echo "[INFO] Installing sophos_firewall_audit..."
-gh release download v1.0.14 --repo github.com/sophos/sophos-firewall-audit
-pip install sophos_firewall_audit-1.0.14-py3-none-any.whl
+LATEST_TAG=$(gh release list --repo github.com/sophos/sophos-firewall-audit --limit 1 --json tagName | jq -r '.[0].tagName' 2>/dev/null)
+echo "[INFO] Installing sophos_firewall_audit version $LATEST_TAG..."
+gh release download $LATEST_TAG --repo github.com/sophos/sophos-firewall-audit
+pip install sophos_firewall_audit-$LATEST_TAG-py3-none-any.whl
 
 # Run audit
 echo "[INFO] Running audit tool..."
