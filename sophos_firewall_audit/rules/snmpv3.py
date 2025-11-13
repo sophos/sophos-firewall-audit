@@ -58,6 +58,18 @@ def eval_snmpv3(fw_obj: SophosFirewall,
         "pass_ct": 0,
         "fail_ct": 0
     }
+
+    # Changes for v22
+    if result:
+        if result["Response"]["@APIVersion"][:2] >= "22":
+            # Remove Name key since it did not exist pre-v22
+            actual.pop("Name")
+            # Rename "AuthorizedHosts" to "AuthorizedHostsIpv4" in expected
+            expected["AuthorizedHostsIpv4"] = expected.pop("AuthorizedHosts")
+            # Convert SendTraps and AcceptQueries from "Enabled/Disabled" to True/False
+            expected["SendTraps"] = "true" if expected["SendTraps"] == "Enabled" else "false"
+            expected["AcceptQueries"] = "true" if expected["AcceptQueries"] == "Enabled" else "false"
+
     
     output = []
     for key in expected:
