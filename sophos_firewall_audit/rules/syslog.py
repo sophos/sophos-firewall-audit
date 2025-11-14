@@ -41,16 +41,29 @@ def eval_syslog(fw_obj: SophosFirewall,
         break
 
     actual_settings = {}
+    api_version = result["Response"]["@APIVersion"]
     for settings_group in result["Response"]["SyslogServers"]:
-        actual_settings[settings_group["Name"]] = settings_group["LogSettings"]
+        actual_settings[settings_group["Name"]] = settings_group
 
-    expected_settings = settings
+    expected_settings = settings.get(fw_obj.region)
 
     results = []
     for settings_container in expected_settings:
         container_name = settings_container['name']
     
         settings_dict = {}
+        top_level_keys = ["ServerAddress", "EnableSecureConnection", "Port", "Facility", "SeverityLevel", "Format"]
+
+        for key in top_level_keys:
+            if key in settings_container:
+                settings_dict[key] = {}
+                settings_dict[key]["Name"] = container_name
+                settings_dict[key]["Expected"] = settings_container[key]
+                if key == "Format":
+                    if actual_settings[container_name][key] == "3":
+                        actual_settings[container_name][key] = "Standard syslog"
+                settings_dict[key]["Actual"] = actual_settings[container_name][key] if container_name in actual_settings else f"{container_name} not configured!"
+
         for settings_category in settings_container['LogSettings']:
             if not settings_category in settings_dict:
                 settings_dict[settings_category] = {}
@@ -61,10 +74,10 @@ def eval_syslog(fw_obj: SophosFirewall,
                 if container_name in actual_settings:
                     # Fix for v22 where settings under LogSettings > ATP were changed
                     # Makes sure the setting actually exists before trying to access it
-                    if setting in actual_settings[container_name][settings_category]: 
-                        settings_dict[settings_category][setting]["Actual"] = actual_settings[container_name][settings_category][setting]
+                    if setting in actual_settings[container_name]["LogSettings"][settings_category]: 
+                        settings_dict[settings_category][setting]["Actual"] = actual_settings[container_name]["LogSettings"][settings_category][setting]
                     else:
-                        settings_dict[settings_category].pop(setting)
+                        settings_dict[settings_category][setting]["Actual"] = f"{setting} not available in API version {api_version}"
                 else:
                     settings_dict[settings_category][setting]["Actual"] = f"{container_name} not configured!"
         results.append(settings_dict)
@@ -83,19 +96,34 @@ def eval_syslog(fw_obj: SophosFirewall,
             category_status = "AUDIT_PASS"
             category_expected = []
             category_actual = []
-            for setting in result[category].keys():
-                category_expected.append(f"{setting}: {result[category][setting]['Expected']}")
-                
-                settings_type = result[category][setting]["Name"]
-                if not result[category][setting]['Expected'] == result[category][setting]['Actual']:
-                    category_actual.append(f"{setting}: {html_yellow(result[category][setting]['Actual'])}")
+
+            if category in top_level_keys:
+                category_expected.append(f"{result[category]['Expected']}")
+                settings_type = result[category]["Name"]
+                if not result[category]['Expected'] == result[category]['Actual']:
+                    category_actual.append(f"{html_yellow(result[category]['Actual'])}")
                     category_status = "AUDIT_FAIL"
                     result_dict["audit_result"] = "FAIL"
                 else:
-                    category_actual.append(f"{setting}: {result[category][setting]['Actual']}")
+                    category_actual.append(f"{result[category]['Actual']}")
+            else:
+                for setting in result[category].keys():
+                    category_expected.append(f"{setting}: {result[category][setting]['Expected']}")               
+                    settings_type = result[category][setting]["Name"]
+                    if result[category][setting]['Actual'] == f"{setting} not available in API version {api_version}":
+                        category_actual.append(f"{result[category][setting]['Actual']}")
+                        category_status = "AUDIT_PASS"
+                        result_dict["audit_result"] = "PASS"
+                    elif not result[category][setting]['Expected'] == result[category][setting]['Actual']:
+                        category_actual.append(f"{setting}: {html_yellow(result[category][setting]['Actual'])}")
+                        category_status = "AUDIT_FAIL"
+                        result_dict["audit_result"] = "FAIL"
+                    else:
+                        category_actual.append(f"{setting}: {result[category][setting]['Actual']}")
+
             if category_status == "AUDIT_PASS":
                 result_dict["pass_ct"] += 1
-            else:
+            elif category_status == "AUDIT_FAIL":
                 result_dict["fail_ct"] += 1
             output.append([
                 "Syslog",
