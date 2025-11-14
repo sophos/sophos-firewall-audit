@@ -80,101 +80,101 @@ def run_audit(args, fw_obj, firewall, status_dict, local_dirname, web_dirname):
     logging.info(f"{firewall_name}: Begin Audit")
 
     rule_list = [
-        # {
-        #     "method": rules.eval_access_list, 
-        #     "settings": audit_settings["access_acl"],
-        #     "log_msg": "Evaluate Access ACL"
-        # },
-        # {
-        #     "method": rules.eval_central_mgmt, 
-        #     "settings": audit_settings,
-        #     "log_msg": "Evaluate Central Management"
-        # },
-        # {
-        #     "method": rules.eval_device_access_profile,
-        #     "settings": audit_settings["device_access_profile"],
-        #     "log_msg": "Evaluate Device Access Profiles"
-        # },
-        # {
-        #     "method": rules.eval_admin_services,
-        #     "settings": audit_settings["admin_services"],
-        #     "log_msg": "Evaluate WAN Zone Admin Services"
-        # },
-        # {
-        #     "method": rules.eval_admin_authen,
-        #     "settings": audit_settings["authen_servers"],
-        #     "log_msg": "Evaluate Authentication Servers"
-        # },
-        # {
-        #     "method": rules.eval_malware_protection,
-        #     "settings": audit_settings["malware_protection"],
-        #     "log_msg": "Evaluate Malware Protection Antivirus Engine"
-        # },
-        # {
-        #     "method": rules.eval_atp,
-        #     "settings": audit_settings["threat_protection"],
-        #     "log_msg": "Evaluate Advanced Threat Protection (ATP)"
-        # },
-        # {
-        #     "method": rules.eval_ips_policies,
-        #     "settings": audit_settings["ips_policies"],
-        #     "log_msg": "Evaluate IPS Policies"
-        # },
-        # {
-        #     "method": rules.eval_hostgroups,
-        #     "settings": audit_settings["host_groups"],
-        #     "log_msg": "Evaluate Host Groups"
-        # },
+        {
+            "method": rules.eval_access_list, 
+            "settings": audit_settings["access_acl"],
+            "log_msg": "Evaluate Access ACL"
+        },
+        {
+            "method": rules.eval_central_mgmt, 
+            "settings": audit_settings,
+            "log_msg": "Evaluate Central Management"
+        },
+        {
+            "method": rules.eval_device_access_profile,
+            "settings": audit_settings["device_access_profile"],
+            "log_msg": "Evaluate Device Access Profiles"
+        },
+        {
+            "method": rules.eval_admin_services,
+            "settings": audit_settings["admin_services"],
+            "log_msg": "Evaluate WAN Zone Admin Services"
+        },
+        {
+            "method": rules.eval_admin_authen,
+            "settings": audit_settings["authen_servers"],
+            "log_msg": "Evaluate Authentication Servers"
+        },
+        {
+            "method": rules.eval_malware_protection,
+            "settings": audit_settings["malware_protection"],
+            "log_msg": "Evaluate Malware Protection Antivirus Engine"
+        },
+        {
+            "method": rules.eval_atp,
+            "settings": audit_settings["threat_protection"],
+            "log_msg": "Evaluate Advanced Threat Protection (ATP)"
+        },
+        {
+            "method": rules.eval_ips_policies,
+            "settings": audit_settings["ips_policies"],
+            "log_msg": "Evaluate IPS Policies"
+        },
+        {
+            "method": rules.eval_hostgroups,
+            "settings": audit_settings["host_groups"],
+            "log_msg": "Evaluate Host Groups"
+        },
         {
             "method": rules.eval_syslog,
             "settings": audit_settings["syslog"],
             "log_msg": "Evaluate Syslog Settings"
         },
-        # {
-        #     "method": rules.eval_notifications,
-        #     "settings": audit_settings,
-        #     "log_msg": "Evaluate Notifications Settings"
-        # },
-        # {
-        #     "method": rules.eval_notification_list,
-        #     "settings": audit_settings,
-        #     "log_msg": "Evaluate Notification List Settings"
-        # },
-        # {
-        #     "method": rules.eval_backup,
-        #     "settings": audit_settings,
-        #     "log_msg": "Evaluate Scheduled Backup Settings"
-        # },
-        # {
-        #     "method": rules.eval_certificate,
-        #     "settings": audit_settings,
-        #     "log_msg": "Evaluate Certificate Settings"
-        # },
-        # {
-        #     "method": rules.eval_loginsecurity,
-        #     "settings": audit_settings,
-        #     "log_msg": "Evaluate Login Security"
-        # },
-        # {
-        #     "method": rules.eval_dns_servers,
-        #     "settings": audit_settings,
-        #     "log_msg": "Evaluate DNS Servers"
-        # },
-        # {
-        #     "method": rules.eval_smtp_protection,
-        #     "settings": audit_settings,
-        #     "log_msg": "Evaluate SMTP Protection"
-        # },
-        # {
-        #     "method": rules.eval_snmpv3,
-        #     "settings": audit_settings,
-        #     "log_msg": "Evaluate SNMPv3"
-        # },
-        # {
-        #     "method": rules.eval_time,
-        #     "settings": audit_settings['time'],
-        #     "log_msg": "Evaluate Time Settings"
-        # }
+        {
+            "method": rules.eval_notifications,
+            "settings": audit_settings,
+            "log_msg": "Evaluate Notifications Settings"
+        },
+        {
+            "method": rules.eval_notification_list,
+            "settings": audit_settings,
+            "log_msg": "Evaluate Notification List Settings"
+        },
+        {
+            "method": rules.eval_backup,
+            "settings": audit_settings,
+            "log_msg": "Evaluate Scheduled Backup Settings"
+        },
+        {
+            "method": rules.eval_certificate,
+            "settings": audit_settings,
+            "log_msg": "Evaluate Certificate Settings"
+        },
+        {
+            "method": rules.eval_loginsecurity,
+            "settings": audit_settings,
+            "log_msg": "Evaluate Login Security"
+        },
+        {
+            "method": rules.eval_dns_servers,
+            "settings": audit_settings,
+            "log_msg": "Evaluate DNS Servers"
+        },
+        {
+            "method": rules.eval_smtp_protection,
+            "settings": audit_settings,
+            "log_msg": "Evaluate SMTP Protection"
+        },
+        {
+            "method": rules.eval_snmpv3,
+            "settings": audit_settings,
+            "log_msg": "Evaluate SNMPv3"
+        },
+        {
+            "method": rules.eval_time,
+            "settings": audit_settings['time'],
+            "log_msg": "Evaluate Time Settings"
+        }
     ]
     for rule in rule_list:
         result = process_rule(rule["method"], rule["settings"], rule["log_msg"], fw_obj, status_dict)
