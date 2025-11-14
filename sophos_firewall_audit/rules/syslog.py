@@ -59,7 +59,7 @@ def eval_syslog(fw_obj: SophosFirewall,
                 settings_dict[key] = {}
                 settings_dict[key]["Name"] = container_name
                 settings_dict[key]["Expected"] = settings_container[key]
-                if key == "Format":
+                if key == "Format" and container_name in actual_settings:
                     if actual_settings[container_name][key] == "3":
                         actual_settings[container_name][key] = "Standard syslog"
                 settings_dict[key]["Actual"] = actual_settings[container_name][key] if container_name in actual_settings else f"{container_name} not configured!"
