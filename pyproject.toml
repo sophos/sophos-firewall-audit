@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sophos-firewall-audit"
-version = "1.0.18"
+version = "1.0.19"
 description = "Sophos Firewall Audit"
 authors = ["Matt Mullen <matt.mullen@sophos.com>"]
 readme = "README.md"
