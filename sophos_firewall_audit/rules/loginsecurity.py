@@ -60,6 +60,9 @@ def eval_loginsecurity(fw_obj: SophosFirewall, fw_name: str, settings: dict):
                 settings_dict[key][category] = {}
                 if isinstance(expected_settings[key][category], dict):
                     for subcategory in expected_settings[key][category]:
+                        # FIX: IncludeNumericCharacter is only available in v22 and above, so skip this check for earlier versions
+                        if subcategory == "IncludeNumericCharacter" and not result["Response"]["@APIVersion"].startswith("22"):
+                            continue
                         settings_dict[key][category][subcategory] = {}
                         settings_dict[key][category][subcategory][
                             "expected"
