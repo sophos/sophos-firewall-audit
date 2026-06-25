@@ -14,3 +14,4 @@ sophos_firewall_audit/results_html*
 firewalls.yaml
 /rule_export*
 error.log
+.venv/
