@@ -11,7 +11,6 @@ import os
 import yaml
 import logging
 import json
-import pkg_resources
 import html
 html.escape = lambda *args, **kwargs: args[0]
 from jinja2 import Environment, PackageLoader, Template, select_autoescape
