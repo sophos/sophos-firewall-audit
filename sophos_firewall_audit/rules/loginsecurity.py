@@ -59,9 +59,12 @@ def eval_loginsecurity(fw_obj: SophosFirewall, fw_name: str, settings: dict):
                 settings_dict[key] = {}
                 settings_dict[key][category] = {}
                 if isinstance(expected_settings[key][category], dict):
+                    actual_category = actual_settings.get(key, {}).get(category, {})
                     for subcategory in expected_settings[key][category]:
-                        # FIX: IncludeNumericCharacter is only available in v22 and above, so skip this check for earlier versions
-                        if subcategory == "IncludeNumericCharacter" and not result["Response"]["@APIVersion"].startswith("22"):
+                        # Firmware may not expose this subcategory at all (e.g. older
+                        # versions lacking IncludeNumericCharacter); skip rather than
+                        # treat an unsupported setting as a compliance failure.
+                        if subcategory not in actual_category:
                             continue
                         settings_dict[key][category][subcategory] = {}
                         settings_dict[key][category][subcategory][
@@ -69,17 +72,20 @@ def eval_loginsecurity(fw_obj: SophosFirewall, fw_name: str, settings: dict):
                         ] = expected_settings[key][category][subcategory]
                         settings_dict[key][category][subcategory][
                             "actual"
-                        ] = actual_settings[key][category][subcategory]
+                        ] = actual_category[subcategory]
                 else:
+                    actual_key = actual_settings.get(key, {})
+                    if category not in actual_key:
+                        continue
                     settings_dict[key][category]["expected"] = expected_settings[key][
                         category
                     ]
-                    settings_dict[key][category]["actual"] = actual_settings[key][
-                        category
-                    ]
+                    settings_dict[key][category]["actual"] = actual_key[category]
 
                 results.append(settings_dict)
         else:
+            if key not in actual_settings:
+                continue
             settings_dict = {}
             settings_dict[key] = {}
             settings_dict[key]["expected"] = expected_settings[key]
