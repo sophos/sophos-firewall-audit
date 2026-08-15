@@ -23,7 +23,7 @@ pip install sophos_firewall_audit-${LATEST_TAG#v}-py3-none-any.whl
 # Run audit
 echo "[INFO] Running audit tool..."
 
-sophosfirewallaudit -s audit_settings.yaml --use_nautobot -q ../nautobot_query/all_devices_query.gql --disable_verify --use_vault
+sophosfirewallaudit -s audit_settings.yaml --use_nautobot -q ../nautobot_query/all_devices_query.gql --use_vault
 mv results_html_web ../docker/results_html_web
 
 echo "[INFO] Listing files in current working directory: $(pwd)"

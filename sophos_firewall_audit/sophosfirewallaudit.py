@@ -184,7 +184,7 @@ def main():
             password=fw_password,
             hostname=firewall['hostname'],
             port=firewall['port'],
-            verify=False
+            verify=True
         )
         fw.region = firewall.get("region")
         try:
