@@ -45,7 +45,36 @@ def eval_syslog(fw_obj: SophosFirewall,
     for settings_group in result["Response"]["SyslogServers"]:
         actual_settings[settings_group["Name"]] = settings_group
 
-    expected_settings = settings.get(fw_obj.region)
+    # audit_settings.yaml.example ships syslog as a list of server
+    # definitions. Region-keyed dicts (like dns_servers) are also
+    # supported: { na: [...], emea: [...] }.
+    if isinstance(settings, list):
+        expected_settings = settings
+    elif isinstance(settings, dict):
+        expected_settings = settings.get(fw_obj.region, settings.get("default"))
+        if expected_settings is None:
+            logging.error(
+                "Syslog settings must be a list of servers, or a dict keyed "
+                "by firewall region (got keys: %s)",
+                list(settings.keys()),
+            )
+            sys.exit(1)
+        if isinstance(expected_settings, dict):
+            # Misconfigured: entire syslog block was treated as one region map
+            # without a matching region key — reject clearly.
+            logging.error(
+                "Syslog settings for region %s must be a list of server "
+                "definitions, not %s",
+                fw_obj.region,
+                type(expected_settings).__name__,
+            )
+            sys.exit(1)
+    else:
+        logging.error(
+            "Syslog settings must be a list or dict, got %s",
+            type(settings).__name__,
+        )
+        sys.exit(1)
 
     results = []
     for settings_container in expected_settings:
