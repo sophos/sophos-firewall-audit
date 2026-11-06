@@ -97,7 +97,7 @@ Example:
 sophosfirewallaudit --inventory_file firewalls.yaml --settings_file audit_settings.yaml
 ```
 
-> The `--rule_export` command provides the ability to export the firewall rules so that they can be viewed offline using a web browser. If this flag is provided, the audit will be skipped and instead the rule export will be executed.
+> The `--rule_export` command provides the ability to export the firewall rules so that they can be viewed offline using a web browser. If this flag is provided, the audit will be skipped and instead the rule export will be executed. Network rules and user rules (Match known users) are both included.
 
 ## Viewing Results
 Upon completion of each audit run, html files containing the results are generated. The directory `results_html_local` can be used to view the results in the browser by opening them as files (no web server required). The directory `results_html_web` contains html files with the links formatted such that the content can be published on a web server.
