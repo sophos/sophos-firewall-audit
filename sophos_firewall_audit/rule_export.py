@@ -22,34 +22,118 @@ env = Environment(
     autoescape=select_autoescape()
 )
 
+# GUI "Match known users" rules are PolicyType User and live under UserPolicy.
+# Network rules stay under NetworkPolicy. Both share the same traffic fields.
+_POLICY_BODIES = ("NetworkPolicy", "UserPolicy")
+_EXPORTABLE_TYPES = {"Network", "User"}
+
+
 def format_object(policy, parent, child):
-    if parent in policy:
-        if isinstance(policy[parent][child], str):
-            return policy[parent][child]
-        elif isinstance(policy[parent][child], list):
-            return '\n'.join(policy[parent][child])
-    else:
+    if not isinstance(policy, dict) or parent not in policy or policy[parent] in (None, ""):
         return "Any"
+    node = policy[parent]
+    if isinstance(node, str):
+        return node
+    if isinstance(node, list):
+        return "\n".join(str(item) for item in node)
+    if not isinstance(node, dict) or child not in node or node[child] in (None, ""):
+        return "Any"
+    value = node[child]
+    if isinstance(value, list):
+        return "\n".join(str(item) for item in value)
+    return str(value)
+
+
+def _as_rule_list(rules):
+    """xmltodict returns one FirewallRule as a dict and many as a list."""
+    ruleset = {}
+    if isinstance(rules, dict):
+        ruleset = rules.get("Response", {}).get("FirewallRule", [])
+    if isinstance(ruleset, dict):
+        return [ruleset]
+    if isinstance(ruleset, list):
+        return [rule for rule in ruleset if isinstance(rule, dict)]
+    return []
+
+
+def _policy_body(rule):
+    for key in _POLICY_BODIES:
+        body = rule.get(key)
+        if isinstance(body, dict):
+            return body
+    # Some API responses lift UserPolicy fields onto the rule itself.
+    if rule.get("PolicyType") in _EXPORTABLE_TYPES and "Action" in rule:
+        return rule
+    return None
+
+
+def _member_names(value):
+    if value in (None, ""):
+        return []
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, list):
+        names = []
+        for item in value:
+            names.extend(_member_names(item))
+        return names
+    if isinstance(value, dict):
+        names = []
+        for child in ("Member", "User", "Username", "Group", "Name"):
+            if child in value:
+                names.extend(_member_names(value[child]))
+        return names
+    return [str(value)]
+
+
+def format_identity(policy):
+    """Describe Match known users / captive portal on a UserPolicy."""
+    if not isinstance(policy, dict):
+        return ""
+    parts = []
+    match = policy.get("MatchIdentity")
+    if isinstance(match, str) and match.lower() == "enable":
+        parts.append("Match known users")
+    members = []
+    for key in ("Member", "Members", "User", "Users", "Identity"):
+        if key in policy:
+            members.extend(_member_names(policy[key]))
+    seen = []
+    for name in members:
+        if name not in seen:
+            seen.append(name)
+    if seen:
+        parts.append("\n".join(seen))
+    portal = policy.get("ShowCaptivePortal")
+    if isinstance(portal, str) and portal.lower() == "enable":
+        parts.append("Captive portal")
+    return "\n".join(parts)
+
 
 def process_rules(rules):
     output = []
-    for rule in rules["Response"]["FirewallRule"]:
-        if rule["PolicyType"] == "Network":
-            output.append(
-                [
-                    rule["Name"],
-                    rule["Description"],
-                    rule["Status"],
-                    rule["NetworkPolicy"]["Action"],
-                    format_object(rule["NetworkPolicy"], "SourceNetworks", "Network"),
-                    format_object(rule["NetworkPolicy"], "SourceZones", "Zone"),
-                    format_object(rule["NetworkPolicy"], "DestinationNetworks", "Network"),
-                    format_object(rule["NetworkPolicy"], "DestinationZones", "Zone"),
-                    format_object(rule["NetworkPolicy"], "Services", "Service"),
-                    rule["NetworkPolicy"]["LogTraffic"],
-                    rule["NetworkPolicy"]["Schedule"]
-                ]
-            )
+    for rule in _as_rule_list(rules):
+        if rule.get("PolicyType") not in _EXPORTABLE_TYPES:
+            continue
+        policy = _policy_body(rule)
+        if policy is None:
+            continue
+        output.append(
+            [
+                rule.get("Name", ""),
+                rule.get("Description", ""),
+                rule.get("Status", ""),
+                policy.get("Action", ""),
+                format_object(policy, "SourceNetworks", "Network"),
+                format_object(policy, "SourceZones", "Zone"),
+                format_object(policy, "DestinationNetworks", "Network"),
+                format_object(policy, "DestinationZones", "Zone"),
+                format_object(policy, "Services", "Service"),
+                policy.get("LogTraffic", ""),
+                policy.get("Schedule", ""),
+                format_identity(policy),
+            ]
+        )
     return output
 
 
@@ -60,7 +144,7 @@ def export_rules(fw_obj, firewall, local_dirname, web_dirname):
     rules = fw_obj.get_fw_rule()
     table = PrettyTable()
     table.hrules = ALL
-    table.field_names = ["Name", "Description", "Status", "Action", "Src Network", "Src Zone", "Dst Network", "Dst Zone", "Service", "Log", "Schedule"]
+    table.field_names = ["Name", "Description", "Status", "Action", "Src Network", "Src Zone", "Dst Network", "Dst Zone", "Service", "Log", "Schedule", "Identity"]
     output = process_rules(rules)
     table.add_rows(output)
     table.valign = "m"
